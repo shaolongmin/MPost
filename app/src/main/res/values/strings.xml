@@ -3,4 +3,7 @@
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="main_tab_first">交易</string>
+    <string name="main_tab_second">交易</string>
+    <string name="main_tab_three">交易</string>
 </resources>
