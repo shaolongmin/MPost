@@ -1,12 +1,16 @@
 package com.zoneol.mpost;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-public class MainActivity extends FragmentActivity implements View.OnClickListener{
+import com.zoneol.mpost.activity.DealActivity;
+import com.zoneol.mpost.activity.SettingActivity;
+
+public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -16,9 +20,9 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     }
 
     private void init() {
-        findViewById(R.id.main_tab_first).setOnClickListener(this);
-        findViewById(R.id.main_tab_second).setOnClickListener(this);
-        findViewById(R.id.main_tab_three).setOnClickListener(this);
+        findViewById(R.id.main_tab_deal).setOnClickListener(this);
+        findViewById(R.id.main_tab_setting).setOnClickListener(this);
+        findViewById(R.id.main_tab_update).setOnClickListener(this);
     }
 
     @Override
@@ -46,11 +50,13 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     @Override
     public void onClick(View v) {
         int id = v.getId() ;
-        if (id == R.id.main_tab_first) {
-
-        } else if (id == R.id.main_tab_second) {
-
-        } else if (id == R.id.main_tab_three) {
+        if (id == R.id.main_tab_deal) {
+            Intent intent = new Intent(this , DealActivity.class) ;
+            startActivity(intent);
+        } else if (id == R.id.main_tab_setting) {
+            Intent intent = new Intent(this , SettingActivity.class) ;
+            startActivity(intent);
+        } else if (id == R.id.main_tab_update) {
 
         }
     }

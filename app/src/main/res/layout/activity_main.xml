@@ -9,7 +9,7 @@
                 android:orientation="horizontal"
                 android:weightSum="4">
     <LinearLayout
-        android:id="@+id/main_tab_first"
+        android:id="@+id/main_tab_deal"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -19,16 +19,16 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_launcher"
+            android:src="@mipmap/ic_launcher"
             />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/main_tab_first"/>
+            android:text="@string/main_tab_deal"/>
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/main_tab_second"
+        android:id="@+id/main_tab_setting"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -38,16 +38,16 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_launcher"
+            android:src="@mipmap/ic_launcher"
             />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/main_tab_first"/>
+            android:text="@string/main_tab_setting"/>
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/main_tab_three"
+        android:id="@+id/main_tab_update"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -57,12 +57,12 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_launcher"
+            android:src="@mipmap/ic_launcher"
             />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/main_tab_first"/>
+            android:text="@string/main_tab_update"/>
     </LinearLayout>
 
 </LinearLayout>
