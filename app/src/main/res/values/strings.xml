@@ -2,10 +2,12 @@
     <string name="app_name">MPost</string>
 
     <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
+    <string name="action_settings">添加</string>
     <string name="main_tab_deal">交易</string>
     <string name="main_tab_setting">设置</string>
     <string name="main_tab_update">更新</string>
     <string name="title_activity_deal">DealActivity</string>
     <string name="title_activity_setting">SettingActivity</string>
+    <string name="title_activity_setting_expandable_list_view">SettingExpandableListViewActivity
+    </string>
 </resources>

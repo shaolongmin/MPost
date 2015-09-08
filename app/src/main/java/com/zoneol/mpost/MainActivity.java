@@ -7,6 +7,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.popsecu.sdk.Controller;
 import com.zoneol.mpost.activity.DealActivity;
 import com.zoneol.mpost.activity.SettingActivity;
 
@@ -15,7 +16,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.setTitle("POST");
         setContentView(R.layout.activity_main);
+        Controller.getInstance().initThreeInfo(this);
         init();
     }
 

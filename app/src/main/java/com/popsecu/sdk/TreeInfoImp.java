@@ -6,10 +6,8 @@ package com.popsecu.sdk;
 
 import android.content.Context;
 
-import com.popsecu.sdk.CfgInfo;
-import com.popsecu.sdk.CfgInfo.CfgClassInfo;
-import com.popsecu.sdk.CfgInfo.CfgKeyValue;
 import com.popsecu.sdk.CfgInfo.AppKvInfo;
+import com.popsecu.sdk.CfgInfo.CfgKeyValue;
 import com.popsecu.sdk.CfgInfo.TreeInfo;
 
 import java.io.UnsupportedEncodingException;
@@ -21,6 +19,26 @@ public class TreeInfoImp {
     private TreeInfo mAppTreeInfo = new TreeInfo();
     private ParseXml mParseXml = new ParseXml();
     private Context mContext;
+
+    //test treeInfo start
+    public void setMHwTreeInfo (TreeInfo treeInfo) {
+        this.mHwTreeInfo = treeInfo ;
+    }
+
+    public TreeInfo getMHwTreeInfo() {
+        return this.mHwTreeInfo ;
+    }
+
+    public void setAppTreeInfo (TreeInfo treeInfo) {
+        this.mAppTreeInfo = treeInfo ;
+    }
+
+    public TreeInfo getAppTreeInfo() {
+        return this.mAppTreeInfo ;
+    }
+
+    //test treeInfo end
+
 
     public TreeInfoImp(Context context) {
         mAppTreeInfo.name = "App";
