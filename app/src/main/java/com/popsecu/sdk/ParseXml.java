@@ -115,12 +115,36 @@ public class ParseXml {
 		}
 	}
 
+	public CfgClassInfo getClassInfo(String name) {
+		for (CfgClassInfo item : mClassInfoList) {
+			if (item.name.equals(name)) {
+				return item;
+			}
+		}
+
+		return null;
+	}
+
 	public AppKvInfo getAppKVInfo(String name) {
 		for (int i = 0; i < mAppKvList.size(); i++) {
 			if (mAppKvList.get(i).key.equals(name)) {
 				return mAppKvList.get(i);
 			}
 		}
+		return null;
+	}
+
+	public CfgKeyValue getHwKeyValue(String className, String keyName) {
+		for (CfgClassInfo item : mClassInfoList) {
+			if (item.name.equals(className)) {
+				for (CfgKeyValue kv : item.keyValueList) {
+					if (kv.keyName.equals(keyName)) {
+						return kv;
+					}
+				}
+			}
+		}
+
 		return null;
 	}
 }

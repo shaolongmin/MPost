@@ -7,6 +7,7 @@ public class CfgInfo {
 	public static String TYPE_VIEW_EDIT = "edit";
 	public static String TYPE_VIEW_SELECT = "select";
 	public static String TYPE_VIEW_HW = "HARDWARE";
+	public static String CFG_CLASS_KEY = "CLASS";
 	
 	public static class CfgKeyValue {
 		public String type = TYPE_VIEW_EDIT;
