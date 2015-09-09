@@ -1,0 +1,164 @@
+<CONFIG>
+<class name="UART">
+	<key name="BANDRATE">
+		<value name="bandrate" type="select" default="115200" select="4800|9600|115200"/>
+	</key>
+	<key name="DATABIT">
+		<value name="data bit" type="select" default="8" select="5|6|7|8"/>
+	</key>
+	<key name="PARITYBIT">
+		<value name="parity bit" type="select" default="n" select="o|e|n"/>
+	</key>
+	<key name="STOPBIT">
+		<value name="stop bit" type="select" default="1" select="1|2"/>
+	</key>
+	<key name="INDEX">
+		<value name="index" type="select" default="0" select="0|1|2|3|4"/>
+	</key>
+</class>
+
+<class name="USB">
+	<key name="MODE">
+		<value name="mode" type="select" default="SALVE" select="MASTER|SLAVE"/>
+	</key>
+	<key name="FORMAT">
+		<value name="format" type="select" default="HID" select="HID"/>
+	</key>
+</class>
+
+<class name="LAN">
+	<key name="DHCP">
+		<value name="dhcp" type="select" default="Enable" select="Enable|Disable"/>
+	</key>
+	<key name="IP">
+		<value name="ip address" type="edit" default="192.168.1.1"/>
+	</key>
+	<key name="DNS SERVER1">
+		<value name="dns server1 address" type="edit" default="192.168.1.1"/>
+	</key>
+	<key name="DNS SERVER2">
+		<value name="dns server2 address" type="edit" default="192.168.1.1"/>
+	</key>
+	<key name="MASK">
+		<value name="netmask" type="edit" default="255.255.255.0"/>
+	</key>
+	<key name="GATEWAY">
+		<value name="gateway address" type="edit" default="192.168.1.1"/>
+	</key>
+	<key name="PPPOE_NAME">
+		<value name="pppoe name" type="edit" default="0"/>
+	</key>
+	<key name="PPPOE_PWD">
+		<value name="pppoe password" type="edit" default="0"/>
+	</key>
+	<key name="SERVER_IP">
+		<value name="server ip address" type="edit"  default="192.168.1.1"/>
+	</key>
+	<key name="SERVER_PORT">
+		<value name="server port" type="edit"  default="80"/>
+	</key>
+		<key name="SERVER_DOMAIN">
+		<value name="server domain" type="edit" default="192.168.1.1"/>
+	</key>
+</class>
+
+<class name="WLAN">
+	<key name="SIM">
+		<value name="sim" type="select" default="SIM0" select="SIM0|SIM1"/>
+	</key>
+	<key name="PIN">
+		<value name="pin" type="edit" default="0"/>
+	</key>
+	<key name="APN">
+		<value name="apn" type="edit" default="0"/>
+	</key>
+	<key name="UID">
+		<value name="uid" type="edit" default="0"/>
+	</key>
+	<key name="PWD">
+		<value name="password" type="edit" default="0"/>
+	</key>
+	<key name="DIAL_NUM">
+		<value name="dial number" type="edit" default="0"/>
+	</key>
+	<key name="SERVER_IP">
+		<value name="server ip address" type="edit" default="192.168.1.100"/>
+	</key>
+	<key name="SERVER_PORT">
+		<value name="server port" type="edit" default="90"/>
+	</key>
+	<key name="SERVER_DOMAIN">
+		<value name="server domain" type="edit" default="192.168.1.1"/>
+	</key>
+</class>
+
+<class name="WIFI">
+	<key name="SSID">
+		<value name="ssid" type="edit" default="0"/>
+	</key>
+	<key name="KEY">
+		<value name="key" type="edit" default="0"/>
+	</key>
+	<key name="MODE">
+		<value name="mode" type="select" default="PSK" select="PSK|WPA|WPA2|EWP"/>
+	</key>
+	<key name="DHCP">
+		<value name="dhcp" type="select" default="Enable" select="Enable|Disable"/>
+	</key>
+	<key name="IP">
+		<value name="ip address" type="edit" default="192.168.1.1"/>
+	</key>
+	<key name="DNS SERVER1">
+		<value name="dns server1 address" type="edit" default="192.168.1.1"/>
+	</key>
+	<key name="DNS SERVER2">
+		<value name="dns server2 address" type="edit" default="192.168.1.1"/>
+	</key>
+	<key name="MASK">
+		<value name="netmask" type="edit" default="255.255.255.0"/>
+	</key>
+	<key name="GATEWAY">
+		<value name="gateway address" type="edit" default="192.168.1.1"/>
+	</key>
+	<key name="SERVER_IP">
+		<value name="server ip address" type="edit" default="192.168.1.100"/>
+	</key>
+	<key name="SERVER_PORT">
+		<value name="server port" type="edit" default="90"/>
+	</key>
+	<key name="SERVER_DOMAIN">
+		<value name="server domain" type="edit" default="192.168.1.1"/>
+	</key>
+</class>
+
+<class name="BT">
+	<key name="NAME">
+		<value name="name" type="edit" default="0"/>
+	</key>
+	<key name="MAC">
+		<value name="mac" type="edit" default="0"/>
+	</key>
+	<key name="PIN">
+		<value name="pin" type="edit" default="0"/>
+	</key>
+	<key name="BONDNAME">
+		<value name="bondname" type="edit" default="0"/>
+	</key>
+	<key name="BONDMAC">
+		<value name="bondmac" type="edit" default="0"/>
+	</key>				
+</class>
+
+<class name="OTHER">
+	<key name="BACKLIT">
+		<value name="backlight" type="select" default="1" select="0|1|2|3"/>		
+	</key>
+</class>
+
+<class name="SCRD">
+	<key name="FORMAT">
+		<value name="format" type="edit" default="0"/>		
+	</key>
+</class>
+
+</CONFIG>

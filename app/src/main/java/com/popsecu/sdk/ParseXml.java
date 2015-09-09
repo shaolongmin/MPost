@@ -35,10 +35,11 @@ public class ParseXml {
 	
 	public void initParseXml(Context context) {
 		mContext = context;
-		pareseHwCfg();
+		parseHwCfg();
+		parseAppKV();
 	}
 	
-	private void pareseHwCfg() {
+	private void parseHwCfg() {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory
 				.newInstance();
 		DocumentBuilder db;
@@ -81,7 +82,7 @@ public class ParseXml {
 		}
 	}
 
-	private void pareseAppKV() {
+	private void parseAppKV() {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory
 				.newInstance();
 		DocumentBuilder db;

@@ -1,0 +1,138 @@
+<hwtemp>
+	<mach name="MPOS">
+		<inst className="UART">
+			<kv key="BANDRATE" value="115200"/>
+			<kv key="DATABIT" value="8"/>
+			<kv key="PARITYBIT" value="n"/>
+			<kv key="STOPBIT" value="1"/>
+			<kv key="INDEX" value="0"/>
+		</inst>
+		
+		<inst className="USB">
+			<kv key="MODE" value="SALVE"/>
+			<kv key="FORMAT" value="HID"/>
+		</inst>
+		
+		<inst className="LAN">
+			<kv key="DHCP" value="Enable"/>
+			<kv key="IP" value="192.168.1.1"/>
+			<kv key="DNS SERVER1" value="192.168.1.1"/>
+			<kv key="DNS SERVER2" value="192.168.1.1"/>
+			<kv key="MASK" value="192.168.1.1"/>
+			<kv key="GATEWAY" value="192.168.1.1"/>
+			<kv key="PPPOE_NAME" value=""/>
+			<kv key="PPPOE_PWD" value=""/>
+			<kv key="SERVER_IP" value="192.168.1.1"/>
+			<kv key="SERVER_PORT" value="80"/>
+			<kv key="SERVER_DOMAIN" value="192.168.1.1"/>
+		</inst>
+		
+		<inst className="WLAN">
+			<kv key="SIM" value="SIM0"/>
+			<kv key="PIN" value=""/>
+			<kv key="APN" value=""/>
+			<kv key="UID" value=""/>
+			<kv key="PWD" value=""/>
+			<kv key="DIAL_NUM" value=""/>
+			<kv key="SERVER_IP" value="192.168.1.1"/>
+			<kv key="SERVER_PORT" value="80"/>
+			<kv key="SERVER_DOMAIN" value="192.168.1.1"/>
+		</inst>
+		
+		<inst className="WIFI">
+			<kv key="SSID" value=""/>
+			<kv key="KEY" value=""/>
+			<kv key="MODE" value="PSK"/>
+			<kv key="DHCP" value="Enable"/>
+			<kv key="IP" value="192.168.1.1"/>
+			<kv key="DNS SERVER1" value=""/>
+			<kv key="DNS SERVER2" value="192.168.1.1"/>
+			<kv key="MASK" value="192.168.1.1"/>
+			<kv key="GATEWAY" value="192.168.1.1"/>
+			<kv key="SERVER_IP" value="192.168.1.1"/>
+			<kv key="SERVER_PORT" value="80"/>
+			<kv key="SERVER_DOMAIN" value="192.168.1.1"/>
+		</inst>
+		
+		<inst className="BT">
+			<kv key="NAME" value=""/>
+			<kv key="MAC" value=""/>
+			<kv key="PIN" value="PSK"/>
+			<kv key="BONDNAME" value="Enable"/>
+			<kv key="BONDMAC" value="192.168.1.1"/>
+		</inst>
+		
+		<inst className="OTHER">
+			<kv key="BACKLIT" value="1"/>
+		</inst>
+	</mach>
+	
+	<mach name="CHIP&amp;PIN">
+		<inst className="UART">
+			<kv key="BANDRATE" value="115200"/>
+			<kv key="DATABIT" value="8"/>
+			<kv key="PARITYBIT" value="n"/>
+			<kv key="STOPBIT" value="1"/>
+			<kv key="INDEX" value="0"/>
+		</inst>
+		
+		<inst className="USB">
+			<kv key="MODE" value="SALVE"/>
+			<kv key="FORMAT" value="HID"/>
+		</inst>
+		
+		<inst className="LAN">
+			<kv key="DHCP" value="Enable"/>
+			<kv key="IP" value="192.168.1.1"/>
+			<kv key="DNS SERVER1" value="192.168.1.1"/>
+			<kv key="DNS SERVER2" value="192.168.1.1"/>
+			<kv key="MASK" value="192.168.1.1"/>
+			<kv key="GATEWAY" value="192.168.1.1"/>
+			<kv key="PPPOE_NAME" value=""/>
+			<kv key="PPPOE_PWD" value=""/>
+			<kv key="SERVER_IP" value="192.168.1.1"/>
+			<kv key="SERVER_PORT" value="80"/>
+			<kv key="SERVER_DOMAIN" value="192.168.1.1"/>
+		</inst>
+		
+		<inst className="WLAN">
+			<kv key="SIM" value="SIM0"/>
+			<kv key="PIN" value=""/>
+			<kv key="APN" value=""/>
+			<kv key="UID" value=""/>
+			<kv key="PWD" value=""/>
+			<kv key="DIAL_NUM" value=""/>
+			<kv key="SERVER_IP" value="192.168.1.1"/>
+			<kv key="SERVER_PORT" value="80"/>
+			<kv key="SERVER_DOMAIN" value="192.168.1.1"/>
+		</inst>
+		
+		<inst className="WIFI">
+			<kv key="SSID" value=""/>
+			<kv key="KEY" value=""/>
+			<kv key="MODE" value="PSK"/>
+			<kv key="DHCP" value="Enable"/>
+			<kv key="IP" value="192.168.1.1"/>
+			<kv key="DNS SERVER1" value=""/>
+			<kv key="DNS SERVER2" value="192.168.1.1"/>
+			<kv key="MASK" value="192.168.1.1"/>
+			<kv key="GATEWAY" value="192.168.1.1"/>
+			<kv key="SERVER_IP" value="192.168.1.1"/>
+			<kv key="SERVER_PORT" value="80"/>
+			<kv key="SERVER_DOMAIN" value="192.168.1.1"/>
+		</inst>
+		
+		<inst className="BT">
+			<kv key="NAME" value=""/>
+			<kv key="MAC" value=""/>
+			<kv key="PIN" value="PSK"/>
+			<kv key="BONDNAME" value="Enable"/>
+			<kv key="BONDMAC" value="192.168.1.1"/>
+		</inst>
+		
+		<inst className="OTHER">
+			<kv key="BACKLIT" value="1"/>
+		</inst>
+	</mach>
+
+</hwtemp>

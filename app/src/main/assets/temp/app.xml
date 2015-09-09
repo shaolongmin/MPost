@@ -1,0 +1,7 @@
+<CONFIG>
+	<key name="COMPORT" limit="HARDWARE" class="UART|BT"/>
+	<key name="WLPORT" limit="HARDWARE" class="BT"/>
+	<key name="dhcp" limit="select" default="Enable" select="Enable|Disable"/>
+	<key name="ip address" limit="edit" default="192.168.1.1"/>
+	<key name="test" limit="edit" default="192.168.1.1"/>
+</CONFIG>

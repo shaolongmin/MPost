@@ -1,0 +1,17 @@
+<CONFIG>
+	<key name="MACH">
+		<value name="mach" type="select" default="DXXX" select="DXXX|AXXX|BXXX"/>
+	</key>
+	<key name="BOARDID">
+		<value name="boardid" type="select" default="DXXX-ABCD" select="DXXX-1234|DXXX-1235|DXXX-1236"/>
+	</key>
+	<key name="LCD_MODULE">
+		<value name="lcd" type="select" default="01" select="01|02|03"/>
+	</key>
+	<key name="WIFI_MODULE">
+		<value name="lcd" type="select" default="01" select="01|02|03"/>
+	</key>
+	<key name="BT_MODULE">
+		<value name="lcd" type="select" default="01" select="01|02|03"/>
+	</key>
+</CONFIG>

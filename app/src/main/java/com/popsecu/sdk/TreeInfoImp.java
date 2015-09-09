@@ -11,15 +11,25 @@ import com.popsecu.sdk.CfgInfo.CfgKeyValue;
 import com.popsecu.sdk.CfgInfo.TreeInfo;
 import com.popsecu.sdk.CfgInfo.CfgClassInfo;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 
 public class TreeInfoImp {
     private final int SET_ITEM_SIZE = 64;
-    private List<TreeInfo> mRootTreeInfo = new ArrayList<TreeInfo>();
+    //private List<TreeInfo> mRootTreeInfo = new ArrayList<TreeInfo>();
     private TreeInfo mHwTreeInfo = new TreeInfo();
     private TreeInfo mAppTreeInfo = new TreeInfo();
+
     private ParseXml mParseXml = new ParseXml();
     private Context mContext;
     private List<Integer> mHwHwndList = new ArrayList<Integer>();
@@ -28,7 +38,7 @@ public class TreeInfoImp {
 
     //test treeInfo start
     public void setMHwTreeInfo (TreeInfo treeInfo) {
-        this.mHwTreeInfo = treeInfo ;
+        //this.mHwTreeInfo = treeInfo ;
     }
 
     public TreeInfo getMHwTreeInfo() {
@@ -36,7 +46,7 @@ public class TreeInfoImp {
     }
 
     public void setAppTreeInfo (TreeInfo treeInfo) {
-        this.mAppTreeInfo = treeInfo ;
+        //this.mAppTreeInfo = treeInfo ;
     }
 
     public TreeInfo getAppTreeInfo() {
@@ -47,15 +57,45 @@ public class TreeInfoImp {
 
 
     public TreeInfoImp(Context context) {
-        mAppTreeInfo.name = "App";
         mContext = context;
     }
 
     public void initTreeInfoImp() {
+        mAppTreeInfo.name = "App";
         mParseXml.initParseXml(mContext);
 
-        mRootTreeInfo.add(mHwTreeInfo);
-        mRootTreeInfo.add(mAppTreeInfo);
+        //mRootTreeInfo.add(mHwTreeInfo);
+        //mRootTreeInfo.add(mAppTreeInfo);
+
+        byte[] buf = readCfgFromFile();
+        if (buf == null) {
+            return;
+        }
+
+        loadCfgFromDev(buf);
+    }
+
+    private byte[] readCfgFromFile() {
+        int total = 0;
+        File file = new File("/sdcard/tmp.cfg");
+        int fileLen = (int)file.length();
+        byte[] buf = new byte[fileLen];
+        try {
+            InputStream in = new BufferedInputStream(new FileInputStream(file));
+            while (true) {
+                int ret = in.read(buf, total, fileLen - total);
+                if (ret <= 0) {
+                    break;
+                }
+                total += ret;
+            }
+            in.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        return  buf;
     }
 
     public boolean loadCfgFromDev(byte[] buf) {
@@ -64,7 +104,8 @@ public class TreeInfoImp {
         String str;
 
         try {
-            mHwTreeInfo.name = new String(buf, 0, SET_ITEM_SIZE, "UTF-8");
+            str = new String(buf, 0, SET_ITEM_SIZE, "UTF-8");
+            mHwTreeInfo.name = str.substring(0, str.indexOf(0, '\0'));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
             return false;
@@ -195,6 +236,18 @@ public class TreeInfoImp {
         return null;
     }
 
+    private int getHwndByClassInst(String name) {
+        for (TreeInfo item : mHwTreeInfo.childList) {
+            for (TreeInfo subItem : item.childList) {
+                if (subItem.name.equals(name)) {
+                    return subItem.keyValueList.get(0).hwnd;
+                }
+            }
+        }
+        return 0;
+    }
+
+
     private void copyKeyValue(CfgKeyValue dis, CfgKeyValue src) {
         dis.type = src.type;
         dis.keyName = src.keyName;
@@ -273,5 +326,80 @@ public class TreeInfoImp {
 
             mHwHwndList.add(hwnd);
         }
+    }
+
+    private  byte[] packageKv(ByteBuffer buf, int hwnd, String key, String value) {
+        buf.position(0);
+        buf.putInt(hwnd);
+        buf.put(key.getBytes(), 0, key.length());
+        buf.put((byte) 0);
+        buf.put(value.getBytes(), 0, value.length());
+        byte[] tmp = buf.array();
+
+        return tmp;
+    }
+
+    private byte[] serializationAllCfg() {
+        ByteArrayOutputStream out =  new ByteArrayOutputStream();
+        ByteBuffer buf = ByteBuffer.allocate(64).order(ByteOrder.LITTLE_ENDIAN);
+        byte[] packageBuf;
+
+        for (TreeInfo node : mHwTreeInfo.childList) {
+            for (TreeInfo subNode : node.childList) {
+                if (subNode.keyValueList.size() > 0) {
+                    packageBuf = packageKv(buf, subNode.keyValueList.get(0).hwnd, CfgInfo.CFG_CLASS_KEY, node.name);
+                    try {
+                        out.write(packageBuf);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        return null;
+                    }
+                }
+
+                for (CfgKeyValue item : subNode.keyValueList) {
+                    packageBuf = packageKv(buf, item.hwnd, item.keyName, item.defaultValue);
+                    try {
+                        out.write(packageBuf);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        return null;
+                    }
+                }
+            }
+        }
+
+        for (CfgKeyValue item : mAppTreeInfo.keyValueList) {
+            if (item.disName.length() == 0) {
+                continue;
+            }
+
+            item.keyName = item.disName;
+            String value = item.defaultValue;
+            AppKvInfo kvInfo = mParseXml.getAppKVInfo(item.keyName);
+            if (kvInfo != null) {
+                if (kvInfo.limit.equals(CfgInfo.TYPE_VIEW_HW)) {
+                    value = Integer.toString(getHwndByClassInst(value));
+                }
+            } else {
+                continue;
+            }
+
+            packageBuf = packageKv(buf, item.hwnd, item.keyName, value);
+            try {
+                out.write(packageBuf);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        byte[] totalBuf = out.toByteArray();
+        try {
+            out.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return totalBuf;
     }
 }
