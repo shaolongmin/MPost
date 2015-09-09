@@ -28,6 +28,14 @@
             android:name=".activity.SettingExpandableListViewActivity"
             android:label="@string/title_activity_setting_expandable_list_view" >
         </activity>
+        <activity
+            android:name=".activity.SettingKeyValueActivity"
+            android:label="@string/title_activity_setting_key_value" >
+        </activity>
+        <activity
+            android:name=".activity.SettingAppActivity"
+            android:label="@string/title_activity_setting_app" >
+        </activity>
     </application>
 
 </manifest>

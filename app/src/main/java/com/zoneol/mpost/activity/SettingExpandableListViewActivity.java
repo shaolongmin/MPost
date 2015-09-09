@@ -1,5 +1,6 @@
 package com.zoneol.mpost.activity;
 
+import android.content.Intent;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -18,7 +19,7 @@ import com.zoneol.mpost.fragment.SettingSelectDialogFragment;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SettingExpandableListViewActivity extends AppCompatActivity implements AdapterView.OnItemLongClickListener , SettingSelectDialogFragment.SelectListener{
+public class SettingExpandableListViewActivity extends AppCompatActivity implements AdapterView.OnItemLongClickListener , SettingSelectDialogFragment.SelectListener , AdapterView.OnItemClickListener , ExpandableListView.OnChildClickListener{
 
     private ExpandableListView mSettingExpandableListView ;
     private SettingExpandableAdapter mSettingExpandableAdapter ;
@@ -37,6 +38,9 @@ public class SettingExpandableListViewActivity extends AppCompatActivity impleme
         mSettingExpandableListView = (ExpandableListView)findViewById(R.id.setting_expandablelistView) ;
         mSettingExpandableAdapter = new SettingExpandableAdapter(this) ;
         mSettingExpandableListView.setAdapter(mSettingExpandableAdapter);
+        mSettingExpandableListView.setOnItemLongClickListener(this);
+        mSettingExpandableListView.setOnItemClickListener(this);
+        mSettingExpandableListView.setOnChildClickListener(this);
     }
 
     @Override
@@ -62,27 +66,36 @@ public class SettingExpandableListViewActivity extends AppCompatActivity impleme
     }
 
     public void addItem() {
-        CfgInfo.TreeInfo treeInfo = new CfgInfo.TreeInfo() ;
-        List<CfgInfo.TreeInfo> lChildTreeList =  new ArrayList<>() ;
-        for (int j = 0 ; j < 6 ; j ++) {
-            CfgInfo.TreeInfo childTreeInfo = new CfgInfo.TreeInfo() ;
-            childTreeInfo.name = "第"  + j + "个" ;
-            List<CfgInfo.CfgKeyValue> keyValueList = new ArrayList<>();
-            for (int k = 0 ; k < 6 ; k ++) {
-                CfgInfo.CfgKeyValue keyValue = new CfgInfo.CfgKeyValue() ;
-                keyValue.keyName = "keyName" + k ;
-                keyValue.disName = "disName" + k ;
-                keyValue.defaultValue = "default" + k ;
-                keyValueList.add(keyValue) ;
+        CfgInfo.TreeInfo postTreeInfo = new CfgInfo.TreeInfo() ;
+        List<CfgInfo.TreeInfo>  postTreeInfoList = new ArrayList<>() ;
+        for (int i = 0 ; i < 6 ; i ++) {
+            CfgInfo.TreeInfo treeInfo = new CfgInfo.TreeInfo() ;
+            List<CfgInfo.TreeInfo> lChildTreeList =  new ArrayList<>() ;
+            for (int j = 0 ; j < 6 ; j ++) {
+                CfgInfo.TreeInfo childTreeInfo = new CfgInfo.TreeInfo() ;
+                childTreeInfo.name = "第" + i + "组" + j + "个" ;
+                List<CfgInfo.CfgKeyValue> keyValueList = new ArrayList<>();
+                for (int k = 0 ; k < 6 ; k ++) {
+                    CfgInfo.CfgKeyValue keyValue = new CfgInfo.CfgKeyValue() ;
+                    keyValue.keyName = "keyName" + k ;
+                    keyValue.disName = "disName" + k ;
+                    keyValue.defaultValue = "default" + k ;
+                    keyValueList.add(keyValue) ;
+                }
+                childTreeInfo.keyValueList = keyValueList ;
+                lChildTreeList.add(childTreeInfo) ;
             }
-            childTreeInfo.keyValueList = keyValueList ;
-            lChildTreeList.add(childTreeInfo) ;
-        }
 
-        treeInfo.childList = lChildTreeList ;
-        treeInfo.name = "第" + "addItem" + "组" ;
-        Controller.getInstance().getTreeInfoImp().getMHwTreeInfo().childList.add(treeInfo) ;
-        mSettingExpandableAdapter.notifyDataSetChanged();
+            treeInfo.childList = lChildTreeList ;
+            treeInfo.name = "第" + i + "组" ;
+            postTreeInfoList.add(treeInfo) ;
+        }
+        postTreeInfo.childList = postTreeInfoList ;
+        postTreeInfo.name = "POST" ;
+
+        FragmentManager fm = getSupportFragmentManager() ;
+        SettingSelectDialogFragment dialog = SettingSelectDialogFragment.newInstance(SettingSelectDialogFragment.TYPE_PARENT_ADD , "aditem") ;
+        dialog.show(fm, "additem");
     }
 
     @Override
@@ -102,15 +115,54 @@ public class SettingExpandableListViewActivity extends AppCompatActivity impleme
     }
 
     @Override
-    public void onSelectListener(int type, int position) {
+    public void onSelectListener(int type, int position , Object obj) {
             if (type == SettingSelectDialogFragment.TYPE_PARENT_LONG_ONCLICK) {
                 if (position == 0) {
                     Misc.logd("删除该组");
+                    Controller.getInstance().getTreeInfoImp().getMHwTreeInfo().childList.remove(mSettingGroupId) ;
+                    mSettingExpandableAdapter.notifyDataSetChanged();
                 } else {
                     Misc.logd("添加子项");
                 }
             } else if (type == SettingSelectDialogFragment.TYPE_PARENT_ADD) {
-
+                CfgInfo.TreeInfo treeInfo = (CfgInfo.TreeInfo)obj ;
+                Controller.getInstance().getTreeInfoImp().getMHwTreeInfo().childList.add(treeInfo) ;
+                mSettingExpandableAdapter.notifyDataSetChanged();
             }
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        int groupid = (Integer) view.getTag(R.id.group_position);
+        int childid = (Integer) view.getTag(R.id.child_position);
+        Misc.logd("expandlaListView onItemClick");
+        if(childid ==-1){
+
+        }else{
+            Intent intent = new Intent(this , SettingKeyValueActivity.class) ;
+            intent.putExtra(SettingKeyValueActivity.GROUP_ID ,groupid ) ;
+            intent.putExtra(SettingKeyValueActivity.CHILD_ID , childid) ;
+            startActivity(intent);
+        }
+    }
+
+    @Override
+    public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+        int groupid = (Integer) v.getTag(R.id.group_position);
+        int childid = (Integer) v.getTag(R.id.child_position);
+        Misc.logd("expandlaListView childe");
+        if(childid ==-1){
+
+        }else{
+            String title = Controller.getInstance().getTreeInfoImp().getMHwTreeInfo().childList.get(groupid).childList.get(childid).name ;
+            Intent intent = new Intent(this , SettingKeyValueActivity.class) ;
+            intent.putExtra(SettingKeyValueActivity.GROUP_ID ,groupid ) ;
+            intent.putExtra(SettingKeyValueActivity.CHILD_ID , childid) ;
+            intent.putExtra(SettingKeyValueActivity.KEYVALUE_NAME , title) ;
+
+            Misc.logd("groupid:" + groupid + ",childId:" + childid + ",name:" + title);
+            startActivity(intent);
+        }
+        return true;
     }
 }

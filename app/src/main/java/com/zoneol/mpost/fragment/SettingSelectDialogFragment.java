@@ -12,7 +12,11 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.popsecu.sdk.CfgInfo;
 import com.zoneol.mpost.R;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -30,15 +34,14 @@ public class SettingSelectDialogFragment extends DialogFragment {
     public static final int TYPE_PARENT_LONG_ONCLICK = 0 ;
     public static final int TYPE_PARENT_ADD = 1;
 
-    public String[] longClick = { "删除该组" , "添加子项"} ;
     // TODO: Rename and change types of parameters
     private int mType;
     private String mName;
-
-
+    private String[] sList ={ "删除该组" , "添加子项"} ;
+    private CfgInfo.TreeInfo postTreeInfo ;
     public interface SelectListener
     {
-        void onSelectListener(int type, int position);
+        void onSelectListener(int type, int position , Object obj);
     }
 
     /**
@@ -70,18 +73,53 @@ public class SettingSelectDialogFragment extends DialogFragment {
             mType = getArguments().getInt(ARG_PARAM1);
             mName = getArguments().getString(ARG_PARAM2);
         }
+
+        if (mType == TYPE_PARENT_LONG_ONCLICK) {
+
+        } else if (mType == TYPE_PARENT_ADD) {
+            addItem();
+        }
+    }
+
+    public void addItem() {
+        postTreeInfo = new CfgInfo.TreeInfo() ;
+        List<CfgInfo.TreeInfo> postTreeInfoList = new ArrayList<>() ;
+        for (int i = 0 ; i < 6 ; i ++) {
+            CfgInfo.TreeInfo treeInfo = new CfgInfo.TreeInfo() ;
+            List<CfgInfo.TreeInfo> lChildTreeList =  new ArrayList<>() ;
+            for (int j = 0 ; j < 6 ; j ++) {
+                CfgInfo.TreeInfo childTreeInfo = new CfgInfo.TreeInfo() ;
+                childTreeInfo.name = "第" + i + "组" + j + "个" ;
+                List<CfgInfo.CfgKeyValue> keyValueList = new ArrayList<>();
+                for (int k = 0 ; k < 6 ; k ++) {
+                    CfgInfo.CfgKeyValue keyValue = new CfgInfo.CfgKeyValue() ;
+                    keyValue.keyName = "keyName" + k ;
+                    keyValue.disName = "disName" + k ;
+                    keyValue.defaultValue = "default" + k ;
+                    keyValueList.add(keyValue) ;
+                }
+                childTreeInfo.keyValueList = keyValueList ;
+                lChildTreeList.add(childTreeInfo) ;
+            }
+
+            treeInfo.childList = lChildTreeList ;
+            treeInfo.name = "第" + i + "组" ;
+            postTreeInfoList.add(treeInfo) ;
+        }
+        postTreeInfo.childList = postTreeInfoList ;
+        postTreeInfo.name = "POST" ;
+
+        String[] tmpList = new String[postTreeInfo.childList.size()] ;
+        for (int i = 0 ; i < postTreeInfo.childList.size() ; i ++) {
+            tmpList[i] = postTreeInfo.childList.get(i).name ;
+        }
+        sList = tmpList ;
+
     }
 
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        String[] sList = null;
-        if (mType == TYPE_PARENT_LONG_ONCLICK) {
-            sList = longClick ;
-        } else if (mType == TYPE_PARENT_ADD) {
-
-        }
-
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.fragment_setting_select_dialog, null);
         ListView selectListView = (ListView)view.findViewById(R.id.setting_dialog_listview) ;
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
@@ -92,8 +130,18 @@ public class SettingSelectDialogFragment extends DialogFragment {
         selectListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                dismiss();
                 SelectListener selectListener = (SelectListener)getActivity() ;
-                selectListener.onSelectListener(mType , position);
+                if (mType == TYPE_PARENT_LONG_ONCLICK) {
+                    selectListener.onSelectListener(mType , position , null);
+                } else if(mType == TYPE_PARENT_ADD) {
+                    if (postTreeInfo!=null && postTreeInfo.childList.size() > position) {
+                        CfgInfo.TreeInfo treeInfo = postTreeInfo.childList.get(position) ;
+                        selectListener.onSelectListener(mType , position , treeInfo);
+                    }
+
+                }
+
             }
         });
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
