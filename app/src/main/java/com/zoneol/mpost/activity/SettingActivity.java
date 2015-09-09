@@ -67,7 +67,8 @@ public class SettingActivity extends AppCompatActivity implements AdapterView.On
             Intent intent = new Intent(this , SettingExpandableListViewActivity.class) ;
             startActivity(intent);
         } else if(position == 1) {
-
+            Intent intent = new Intent(this , SettingAppActivity.class) ;
+            startActivity(intent);
         } else {
 
         }

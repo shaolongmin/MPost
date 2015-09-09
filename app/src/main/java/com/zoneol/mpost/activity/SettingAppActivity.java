@@ -1,40 +1,45 @@
 package com.zoneol.mpost.activity;
 
-import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.popsecu.sdk.CfgInfo;
+import com.popsecu.sdk.Controller;
 import com.zoneol.mpost.R;
 
-public class DealActivity extends AppCompatActivity {
-    private ListView sListView;
-//    private ArrayList<String> sList = new ArrayList<>();
+import java.util.ArrayList;
+import java.util.List;
 
-    private String[] sList = {"发送","接收" ,"传递","等等"} ;
+public class SettingAppActivity extends AppCompatActivity {
+
+    private List<CfgInfo.CfgKeyValue> list = new ArrayList<>();
+    private SettingKeyValueAdapter mSettingKeyValueAdapter ;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.setTitle(R.string.main_tab_deal);
-        setContentView(R.layout.activity_deal);
+        setContentView(R.layout.activity_setting_app);
         init();
     }
 
     public void init() {
-        sListView = (ListView)findViewById(R.id.deal_listView) ;
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                this,
-                android.R.layout.simple_expandable_list_item_1,
-                sList);
-        sListView.setAdapter(adapter);
+
+        list = Controller.getInstance().getTreeInfoImp().getAppTreeInfo().keyValueList ;
+
+        ListView listView = (ListView)findViewById(R.id.setting_app_listview) ;
+
+        mSettingKeyValueAdapter = new SettingKeyValueAdapter(this , list) ;
+
+        listView.setAdapter(mSettingKeyValueAdapter);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_deal, menu);
+        getMenuInflater().inflate(R.menu.menu_setting_app, menu);
         return true;
     }
 
