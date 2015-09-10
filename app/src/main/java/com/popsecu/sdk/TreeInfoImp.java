@@ -101,6 +101,7 @@ public class TreeInfoImp {
     public boolean loadCfgFromDev(byte[] buf) {
         mHwTreeInfo = new TreeInfo();
         mAppTreeInfo = new TreeInfo();
+        mAppTreeInfo.name = "App";
         String str;
 
         try {
@@ -116,6 +117,10 @@ public class TreeInfoImp {
         }
 
         return true;
+    }
+
+    public List<CfgClassInfo> getClassInfoList() {
+        return mParseXml.getClassInfoList();
     }
 
     public void addClass(String name) {

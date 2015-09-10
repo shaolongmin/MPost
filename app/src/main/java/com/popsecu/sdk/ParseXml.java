@@ -116,6 +116,10 @@ public class ParseXml {
 		}
 	}
 
+	public List<CfgClassInfo> getClassInfoList() {
+		return mClassInfoList;
+	}
+
 	public CfgClassInfo getClassInfo(String name) {
 		for (CfgClassInfo item : mClassInfoList) {
 			if (item.name.equals(name)) {
