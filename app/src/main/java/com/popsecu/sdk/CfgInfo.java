@@ -10,16 +10,17 @@ public class CfgInfo {
 	public static String CFG_CLASS_KEY = "CLASS";
 	
 	public static class CfgKeyValue {
-		public String type = TYPE_VIEW_EDIT;
+		public String type = TYPE_VIEW_EDIT; // type 判断
 		public String keyName = "";
 		public int hwnd = 0;
-		public String disName = "";
-		public boolean isDisNameReadOnly = true;
-		public String defaultValue = "";
-		public boolean isValueEditable = true;
+		public String disName = "";// 显示
+		public boolean isDisNameReadOnly = true;  //判断key是否可以编辑
+		public String defaultValue = ""; //显示
+		public boolean isValueEditable = true;  //value 是否可编辑
 		public List<String> valueList = new ArrayList<String>();
 	}
-	
+
+	//app 添加
 	public static class CfgClassInfo {
 		public String name = "";
 		public List<CfgKeyValue> keyValueList = new ArrayList<CfgKeyValue>();

@@ -11,6 +11,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.popsecu.sdk.Controller;
+import com.popsecu.sdk.Misc;
 import com.zoneol.mpost.R;
 
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ public class SettingActivity extends AppCompatActivity implements AdapterView.On
     public void init() {
         sList.add(Controller.getInstance().getTreeInfoImp().getMHwTreeInfo().name) ;
         sList.add(Controller.getInstance().getTreeInfoImp().getAppTreeInfo().name) ;
+        Misc.logd("treeName:" + Controller.getInstance().getTreeInfoImp().getMHwTreeInfo().name +", appName:" + Controller.getInstance().getTreeInfoImp().getAppTreeInfo().name);
         sListView = (ListView)findViewById(R.id.setting_listView) ;
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this,

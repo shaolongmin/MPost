@@ -55,7 +55,7 @@ public class SettingKeyValueAdapter extends BaseAdapter implements View.OnClickL
         }
 
         CfgInfo.CfgKeyValue keyValue = mList.get(position) ;
-        viewHolder.keyvalue_item_key.setText(keyValue.keyName);
+        viewHolder.keyvalue_item_key.setText(keyValue.disName);
         viewHolder.keyvalue_item_value.setText(keyValue.defaultValue);
 
         viewHolder.keyvalue_item_key.setTag(position);
@@ -69,10 +69,14 @@ public class SettingKeyValueAdapter extends BaseAdapter implements View.OnClickL
     @Override
     public void onClick(View v) {
         int id = v.getId() ;
+        int position = (int) v.getTag() ;
+        CfgInfo.CfgKeyValue keyValue = mList.get(position) ;
         if (id == R.id.setting_keyvalue_key) {
 
         } else {
+            if (keyValue.isValueEditable) {
 
+            }
         }
     }
 

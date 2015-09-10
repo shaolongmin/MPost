@@ -13,9 +13,9 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.popsecu.sdk.CfgInfo;
+import com.popsecu.sdk.Controller;
 import com.zoneol.mpost.R;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -38,7 +38,6 @@ public class SettingSelectDialogFragment extends DialogFragment {
     private int mType;
     private String mName;
     private String[] sList ={ "删除该组" , "添加子项"} ;
-    private CfgInfo.TreeInfo postTreeInfo ;
     public interface SelectListener
     {
         void onSelectListener(int type, int position , Object obj);
@@ -82,39 +81,12 @@ public class SettingSelectDialogFragment extends DialogFragment {
     }
 
     public void addItem() {
-        postTreeInfo = new CfgInfo.TreeInfo() ;
-        List<CfgInfo.TreeInfo> postTreeInfoList = new ArrayList<>() ;
-        for (int i = 0 ; i < 6 ; i ++) {
-            CfgInfo.TreeInfo treeInfo = new CfgInfo.TreeInfo() ;
-            List<CfgInfo.TreeInfo> lChildTreeList =  new ArrayList<>() ;
-            for (int j = 0 ; j < 6 ; j ++) {
-                CfgInfo.TreeInfo childTreeInfo = new CfgInfo.TreeInfo() ;
-                childTreeInfo.name = "第" + i + "组" + j + "个" ;
-                List<CfgInfo.CfgKeyValue> keyValueList = new ArrayList<>();
-                for (int k = 0 ; k < 6 ; k ++) {
-                    CfgInfo.CfgKeyValue keyValue = new CfgInfo.CfgKeyValue() ;
-                    keyValue.keyName = "keyName" + k ;
-                    keyValue.disName = "disName" + k ;
-                    keyValue.defaultValue = "default" + k ;
-                    keyValueList.add(keyValue) ;
-                }
-                childTreeInfo.keyValueList = keyValueList ;
-                lChildTreeList.add(childTreeInfo) ;
-            }
-
-            treeInfo.childList = lChildTreeList ;
-            treeInfo.name = "第" + i + "组" ;
-            postTreeInfoList.add(treeInfo) ;
-        }
-        postTreeInfo.childList = postTreeInfoList ;
-        postTreeInfo.name = "POST" ;
-
-        String[] tmpList = new String[postTreeInfo.childList.size()] ;
-        for (int i = 0 ; i < postTreeInfo.childList.size() ; i ++) {
-            tmpList[i] = postTreeInfo.childList.get(i).name ;
+        List<CfgInfo.CfgClassInfo> classList = Controller.getInstance().getTreeInfoImp().getClassInfoList() ;
+        String[] tmpList = new String[classList.size()] ;
+        for (int i = 0 ; i < classList.size() ; i ++) {
+            tmpList[i] = classList.get(i).name ;
         }
         sList = tmpList ;
-
     }
 
     @NonNull
@@ -133,13 +105,10 @@ public class SettingSelectDialogFragment extends DialogFragment {
                 dismiss();
                 SelectListener selectListener = (SelectListener)getActivity() ;
                 if (mType == TYPE_PARENT_LONG_ONCLICK) {
-                    selectListener.onSelectListener(mType , position , null);
+                    selectListener.onSelectListener(mType , position , mName);
                 } else if(mType == TYPE_PARENT_ADD) {
-                    if (postTreeInfo!=null && postTreeInfo.childList.size() > position) {
-                        CfgInfo.TreeInfo treeInfo = postTreeInfo.childList.get(position) ;
-                        selectListener.onSelectListener(mType , position , treeInfo);
-                    }
-
+                    Controller.getInstance().getTreeInfoImp().addClass(sList[position]);
+                    selectListener.onSelectListener(mType , position , mName);
                 }
 
             }
