@@ -27,6 +27,8 @@ public class SettingExpandableListViewActivity extends AppCompatActivity impleme
         super.onCreate(savedInstanceState);
         this.setTitle(Controller.getInstance().getTreeInfoImp().getMHwTreeInfo().name);
         setContentView(R.layout.activity_setting_expandable_list_view);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(false);
         init();
     }
 
@@ -56,6 +58,9 @@ public class SettingExpandableListViewActivity extends AppCompatActivity impleme
         if (id == R.id.setting_add) {
             addItem();
             return true;
+        } else if (id == android.R.id.home) {
+            finish();
+            return true ;
         }
 
         return super.onOptionsItemSelected(item);

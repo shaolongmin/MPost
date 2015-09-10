@@ -22,16 +22,18 @@ public class SettingAppActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setting_app);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(false);
         init();
     }
 
-    public void init() {
+        public void init() {
 
         list = Controller.getInstance().getTreeInfoImp().getAppTreeInfo().keyValueList ;
 
         ListView listView = (ListView)findViewById(R.id.setting_app_listview) ;
 
-        mSettingKeyValueAdapter = new SettingKeyValueAdapter(this , list) ;
+        mSettingKeyValueAdapter = new SettingKeyValueAdapter(this , list , true) ;
 
         listView.setAdapter(mSettingKeyValueAdapter);
     }
@@ -51,8 +53,11 @@ public class SettingAppActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == android.R.id.home) {
+            finish();
             return true;
+        } else if (id == R.id.app_add) {
+            return true ;
         }
 
         return super.onOptionsItemSelected(item);

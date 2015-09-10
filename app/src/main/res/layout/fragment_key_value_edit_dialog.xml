@@ -1,0 +1,39 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:tools="http://schemas.android.com/tools"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             tools:context="com.zoneol.mpost.fragment.KeyValueDialogFragment">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        >
+        <EditText
+            android:id="@+id/fragment_key_value_edit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+        <Button
+            android:id="@+id/fragment_key_value_cancel"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:text="@string/fragment_key_value_cancel"
+            android:textSize="18sp"
+            android:layout_weight="1"/>
+
+        <Button
+            android:id="@+id/fragment_key_value_ok"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:text="@string/fragment_key_value_ok"
+            android:textSize="18sp"
+            android:layout_weight="1"/>
+    </LinearLayout>
+
+    </LinearLayout>
+
+</FrameLayout>

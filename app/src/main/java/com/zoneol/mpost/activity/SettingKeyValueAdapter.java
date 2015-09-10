@@ -1,14 +1,17 @@
 package com.zoneol.mpost.activity;
 
 import android.content.Context;
+import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.TextView;
+import android.widget.Button;
 
 import com.popsecu.sdk.CfgInfo;
 import com.zoneol.mpost.R;
+import com.zoneol.mpost.fragment.KeyValueDialogFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,10 +23,18 @@ public class SettingKeyValueAdapter extends BaseAdapter implements View.OnClickL
 
     private Context mContext ;
     private List<CfgInfo.CfgKeyValue> mList = new ArrayList<>();
+    private boolean mIsApp = false ;
+    private AppCompatActivity activity ;
 
-    public SettingKeyValueAdapter (Context context , List<CfgInfo.CfgKeyValue> list) {
+    public SettingKeyValueAdapter (Context context , List<CfgInfo.CfgKeyValue> list , boolean isApp) {
         this.mContext = context ;
         this.mList = list ;
+        this.mIsApp = isApp ;
+        if (context instanceof  SettingKeyValueActivity) {
+            activity = (SettingKeyValueActivity)context ;
+        } else if (context instanceof  SettingAppActivity) {
+            activity = (SettingAppActivity)context ;
+        }
     }
 
     @Override
@@ -47,8 +58,8 @@ public class SettingKeyValueAdapter extends BaseAdapter implements View.OnClickL
         if (convertView == null) {
             viewHolder = new ViewHolder();
             convertView = LayoutInflater.from(mContext).inflate(R.layout.keyvalue_item_layout, null);
-            viewHolder.keyvalue_item_key = (TextView)convertView.findViewById(R.id.setting_keyvalue_key) ;
-            viewHolder.keyvalue_item_value = (TextView)convertView.findViewById(R.id.setting_keyvalue_value) ;
+            viewHolder.keyvalue_item_key = (Button)convertView.findViewById(R.id.setting_keyvalue_key) ;
+            viewHolder.keyvalue_item_value = (Button)convertView.findViewById(R.id.setting_keyvalue_value) ;
             convertView.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
@@ -63,6 +74,12 @@ public class SettingKeyValueAdapter extends BaseAdapter implements View.OnClickL
         viewHolder.keyvalue_item_value.setTag(position);
         viewHolder.keyvalue_item_value.setOnClickListener(this);
 
+        if (mIsApp) {
+            viewHolder.keyvalue_item_key.setEnabled(true);
+        } else {
+            viewHolder.keyvalue_item_key.setEnabled(false);
+        }
+
         return convertView;
     }
 
@@ -74,14 +91,24 @@ public class SettingKeyValueAdapter extends BaseAdapter implements View.OnClickL
         if (id == R.id.setting_keyvalue_key) {
 
         } else {
+            ArrayList<String> arrayStrList = new ArrayList<>() ;
+            for (String str : keyValue.valueList)  {
+                arrayStrList.add(str) ;
+            }
             if (keyValue.isValueEditable) {
-
+                FragmentManager fm = activity.getSupportFragmentManager() ;
+                KeyValueDialogFragment dialog = KeyValueDialogFragment.newInstance(true , position , arrayStrList) ;
+                dialog.show(fm, "");
+            } else {
+                FragmentManager fm = activity.getSupportFragmentManager() ;
+                KeyValueDialogFragment dialog = KeyValueDialogFragment.newInstance(false , position , arrayStrList) ;
+                dialog.show(fm, "");
             }
         }
     }
 
     private class ViewHolder{
-        private TextView keyvalue_item_key ;
-        private TextView keyvalue_item_value ;
+        private Button keyvalue_item_key ;
+        private Button keyvalue_item_value ;
     }
 }

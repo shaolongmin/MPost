@@ -19,6 +19,8 @@ public class DealActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         this.setTitle(R.string.main_tab_deal);
         setContentView(R.layout.activity_deal);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(false);
         init();
     }
 
@@ -46,7 +48,8 @@ public class DealActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == android.R.id.home) {
+            finish();
             return true;
         }
 

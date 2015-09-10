@@ -9,11 +9,12 @@ import android.widget.ListView;
 import com.popsecu.sdk.CfgInfo;
 import com.popsecu.sdk.Controller;
 import com.zoneol.mpost.R;
+import com.zoneol.mpost.fragment.KeyValueDialogFragment;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SettingKeyValueActivity extends AppCompatActivity {
+public class SettingKeyValueActivity extends AppCompatActivity implements KeyValueDialogFragment.KeyValueListener{
     public static final String GROUP_ID = "group_id" ;
     public static final String CHILD_ID = "child_id" ;
     public static final String KEYVALUE_NAME = "keyvalue_name" ;
@@ -21,17 +22,22 @@ public class SettingKeyValueActivity extends AppCompatActivity {
     private List<CfgInfo.CfgKeyValue> list = new ArrayList<>();
     private SettingKeyValueAdapter mSettingKeyValueAdapter ;
 
+    private int groupId = -1 ;
+    private int childId = -1 ;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.setTitle("KeyValue设置");
         setContentView(R.layout.activity_setting_key_value);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(false);
         init();
     }
 
     public void init() {
-        int groupId = getIntent().getIntExtra(GROUP_ID , -1) ;
-        int childId = getIntent().getIntExtra(CHILD_ID , -1) ;
+        groupId = getIntent().getIntExtra(GROUP_ID , -1) ;
+        childId = getIntent().getIntExtra(CHILD_ID , -1) ;
 
         if (groupId == -1 || childId == -1) {
             return ;
@@ -43,7 +49,7 @@ public class SettingKeyValueActivity extends AppCompatActivity {
 
         ListView listView = (ListView)findViewById(R.id.setting_keyvalue_listview) ;
 
-        mSettingKeyValueAdapter = new SettingKeyValueAdapter(this , list) ;
+        mSettingKeyValueAdapter = new SettingKeyValueAdapter(this , list , false) ;
 
         listView.setAdapter(mSettingKeyValueAdapter);
     }
@@ -63,10 +69,17 @@ public class SettingKeyValueActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == android.R.id.home) {
+            finish();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onKeyValueListener(int position, String value) {
+        list.get(position).defaultValue = value ;
+        mSettingKeyValueAdapter.notifyDataSetChanged();
     }
 }

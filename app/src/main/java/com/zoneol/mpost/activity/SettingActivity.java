@@ -25,6 +25,8 @@ public class SettingActivity extends AppCompatActivity implements AdapterView.On
         super.onCreate(savedInstanceState);
         this.setTitle(R.string.main_tab_setting);
         setContentView(R.layout.activity_setting);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(false);
         init();
     }
 
@@ -56,7 +58,8 @@ public class SettingActivity extends AppCompatActivity implements AdapterView.On
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == android.R.id.home) {
+            finish();
             return true;
         }
 
