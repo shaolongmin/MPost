@@ -152,4 +152,8 @@ public class ParseXml {
 
 		return null;
 	}
+
+	public List<String> getmAppkeyList() {
+		return mAppkeyList;
+	}
 }

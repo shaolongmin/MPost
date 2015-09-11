@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TreeInfoImp {
+    private static TreeInfoImp mInstance = null ;
+
     private final int SET_ITEM_SIZE = 64;
     //private List<TreeInfo> mRootTreeInfo = new ArrayList<TreeInfo>();
     private TreeInfo mHwTreeInfo = new TreeInfo();
@@ -35,6 +37,14 @@ public class TreeInfoImp {
     private List<Integer> mHwHwndList = new ArrayList<Integer>();
 
     private String mCurrentClassName = "";
+
+
+//    public static TreeInfoImp getInstance() {
+//        if (mInstance == null) {
+//            mInstance = new TreeInfoImp() ;
+//        }
+//        return mInstance ;
+//    }
 
     //test treeInfo start
     public void setMHwTreeInfo (TreeInfo treeInfo) {
@@ -165,6 +175,56 @@ public class TreeInfoImp {
 
     public void delClassInst(String name) {
         removeTreeNode(mHwTreeInfo.childList, name);
+    }
+
+    public void addAppKv() {
+        CfgKeyValue kv = new CfgKeyValue();
+        kv.type = CfgInfo.TYPE_VIEW_EDIT;
+        kv.isDisNameReadOnly = false;
+        kv.isValueEditable = true;
+        mAppTreeInfo.keyValueList.add(kv);
+    }
+
+    public void delAppKv(int idx) {
+        mAppTreeInfo.keyValueList.remove(idx);
+    }
+
+    public void updateAppKvItem(int idx, String key) {
+        AppKvInfo kvInfo = mParseXml.getAppKVInfo(key);
+        if (kvInfo == null) {
+            return;
+        }
+
+        CfgKeyValue kv = mAppTreeInfo.keyValueList.get(idx);
+        kv.keyName = key;
+        kv.disName = key;
+        kv.valueList.clear();
+        kv.defaultValue = kvInfo.defaultValue;
+        if (kvInfo.limit.equals(CfgInfo.TYPE_VIEW_HW)) {
+            for (String cname : kvInfo.className) {
+                int counts = getClassInstCounts(cname);
+                for (int i = 0; i < counts; i++) {
+                    kv.valueList.add(String.format("%s_%d", cname, i));
+                }
+            }
+        } else if (kvInfo.limit.equals(CfgInfo.TYPE_VIEW_SELECT)) {
+            kv.valueList = new ArrayList<String>(kv.valueList);
+        } else {
+        }
+    }
+
+    public List<String> getAppKeyList() {
+        return mParseXml.getmAppkeyList();
+    }
+
+    private int getClassInstCounts(String name) {
+        for (TreeInfo item : mHwTreeInfo.childList) {
+            if (item.name.equals(name)) {
+                return item.childList.size();
+            }
+        }
+
+        return 0;
     }
 
     private void removeTreeNode(List<TreeInfo> list, String name) {
