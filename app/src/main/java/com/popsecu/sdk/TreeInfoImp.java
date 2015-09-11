@@ -208,7 +208,7 @@ public class TreeInfoImp {
                 }
             }
         } else if (kvInfo.limit.equals(CfgInfo.TYPE_VIEW_SELECT)) {
-            kv.valueList = new ArrayList<String>(kv.valueList);
+            kv.valueList = new ArrayList<String>(kvInfo.valueList);
         } else {
         }
     }
