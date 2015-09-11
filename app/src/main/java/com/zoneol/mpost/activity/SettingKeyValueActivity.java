@@ -78,7 +78,7 @@ public class SettingKeyValueActivity extends AppCompatActivity implements KeyVal
     }
 
     @Override
-    public void onKeyValueListener(int position, String value) {
+    public void onKeyValueListener(int position, String value , boolean isKey) {
         list.get(position).defaultValue = value ;
         mSettingKeyValueAdapter.notifyDataSetChanged();
     }

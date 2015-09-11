@@ -30,10 +30,12 @@ public class KeyValueDialogFragment extends DialogFragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private static final String ARG_PARAM3 = "param3";
+    private static final String ARG_PARAM4 = "param4" ;
 
     // TODO: Rename and change types of parameters
     private boolean mIsEditEbable;
     private int mPosition;
+    private boolean mIsKey ;
 
     private ArrayList<String> sList = new ArrayList<>() ;
 
@@ -46,19 +48,20 @@ public class KeyValueDialogFragment extends DialogFragment {
      * @return A new instance of fragment KeyValueDialogFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static KeyValueDialogFragment newInstance(boolean param1, int position , ArrayList<String> list) {
+    public static KeyValueDialogFragment newInstance(boolean param1, int position , ArrayList<String> list , boolean isKey) {
         KeyValueDialogFragment fragment = new KeyValueDialogFragment();
         Bundle args = new Bundle();
         args.putBoolean(ARG_PARAM1, param1);
         args.putInt(ARG_PARAM2, position);
         args.putStringArrayList(ARG_PARAM3, list);
+        args.putBoolean(ARG_PARAM4 , isKey);
         fragment.setArguments(args);
         return fragment;
     }
 
     public interface KeyValueListener
     {
-        void onKeyValueListener(int position , String value);
+        void onKeyValueListener(int position , String value , boolean isKey);
     }
 
     public KeyValueDialogFragment() {
@@ -72,6 +75,7 @@ public class KeyValueDialogFragment extends DialogFragment {
             mIsEditEbable = getArguments().getBoolean(ARG_PARAM1);
             mPosition = getArguments().getInt(ARG_PARAM2);
             sList = getArguments().getStringArrayList(ARG_PARAM3) ;
+            mIsKey = getArguments().getBoolean(ARG_PARAM4) ;
         }
     }
 
@@ -101,11 +105,15 @@ public class KeyValueDialogFragment extends DialogFragment {
                     }
 
                     KeyValueListener keyValueListener = (KeyValueListener)getActivity() ;
-                    keyValueListener.onKeyValueListener(mPosition , editValue);
+                    keyValueListener.onKeyValueListener(mPosition , editValue , mIsKey);
                 }
             });
         } else {
-            title = "请选择Value值" ;
+            if (mIsKey) {
+                title = "请选择Key值" ;
+            } else {
+                title = "请选择Value值" ;
+            }
             view = LayoutInflater.from(getActivity()).inflate(R.layout.fragment_setting_select_dialog, null);
             ListView selectListView = (ListView)view.findViewById(R.id.setting_dialog_listview) ;
             ArrayAdapter<String> adapter = new ArrayAdapter<>(
@@ -118,7 +126,7 @@ public class KeyValueDialogFragment extends DialogFragment {
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     dismiss();
                     KeyValueListener keyValueListener = (KeyValueListener)getActivity() ;
-                    keyValueListener.onKeyValueListener(mPosition , sList.get(position));
+                    keyValueListener.onKeyValueListener(mPosition , sList.get(position) , mIsKey);
                 }
             });
         }

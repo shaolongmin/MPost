@@ -4,16 +4,20 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.popsecu.sdk.CfgInfo;
 import com.popsecu.sdk.Controller;
+import com.popsecu.sdk.Misc;
 import com.zoneol.mpost.R;
+import com.zoneol.mpost.fragment.KeyValueDialogFragment;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SettingAppActivity extends AppCompatActivity {
+public class SettingAppActivity extends AppCompatActivity implements AdapterView.OnItemLongClickListener , KeyValueDialogFragment.KeyValueListener{
 
     private List<CfgInfo.CfgKeyValue> list = new ArrayList<>();
     private SettingKeyValueAdapter mSettingKeyValueAdapter ;
@@ -22,6 +26,7 @@ public class SettingAppActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setting_app);
+        this.setTitle("APP");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(false);
         init();
@@ -36,6 +41,7 @@ public class SettingAppActivity extends AppCompatActivity {
         mSettingKeyValueAdapter = new SettingKeyValueAdapter(this , list , true) ;
 
         listView.setAdapter(mSettingKeyValueAdapter);
+        listView.setOnItemLongClickListener(this);
     }
 
     @Override
@@ -57,9 +63,32 @@ public class SettingAppActivity extends AppCompatActivity {
             finish();
             return true;
         } else if (id == R.id.app_add) {
+            addAppItem();
             return true ;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void addAppItem() {
+        Controller.getInstance().getTreeInfoImp().addAppKv();
+        mSettingKeyValueAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+        Misc.logd("app long click");
+        return false;
+    }
+
+    @Override
+    public void onKeyValueListener(int position, String value, boolean isKey) {
+        if (isKey) {
+            Controller.getInstance().getTreeInfoImp().updateAppKvItem(position , value);
+            mSettingKeyValueAdapter.notifyDataSetChanged();
+        } else {
+            list.get(position).defaultValue = value ;
+            mSettingKeyValueAdapter.notifyDataSetChanged();
+        }
     }
 }
