@@ -1,5 +1,7 @@
 package com.popsecu.sdk;
 
+import android.content.Context;
+
 /**
  * Created by xumin on 2015/9/10.
  */
@@ -7,6 +9,25 @@ package com.popsecu.sdk;
 
 
 public class CommInteface {
+
+    private static CommInteface mInstance;
+    private Context mContext;
+
+    private CommInteface() {
+
+    }
+
+    public static CommInteface getInstance() {
+        if (mInstance == null) {
+            mInstance = new CommInteface();
+        }
+
+        return mInstance;
+    }
+
+    public void initCommInterface(Context context) {
+        mContext = context;
+    }
 
     public void getInstallPackageInfo() {
         byte subCmd = 0x01;
@@ -18,5 +39,14 @@ public class CommInteface {
 
         //
         //send data;
+    }
+
+    private int ReadLenData(byte[] buf, int ofs, int len) {
+        return 0;
+    }
+
+
+    public interface CommIntefaceCallBack {
+        void onCmdResponse(int subCmd, byte[] data);
     }
 }

@@ -5,6 +5,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.UUID;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.popsecu.sdk.Misc;
 
@@ -25,53 +29,59 @@ import android.os.Message;
 
 @SuppressLint("NewApi")
 public class Ble {
-	
 	public static final int BT_STATUS_DISCONNECT = 0;
 	public static final int BT_STATUS_CONNECTING = 1;
 	public static final int BT_STATUS_CONNECTED = 2;
-	public static final int BT_STATUS_CONNECT_FAILED = 3;
-	
+
 	private static final String TAG = "DevBle";
-
 	public static final int REQUEST_ENABLE_BT = 1;
-
 	private static final long SCAN_PERIOD = 10000; 
 
-	private static final int MSG_SEND = 0;
-	private static final int MSG_CONNECT = 1;
+	private static final int MSG_STATUS = 0;
+	private static final int MSG_SCAN = 1;
 	private static final int MSG_CLEARDATA = 2;
-	private static final int MSG_SCAN = 3 ;
 
-
-	private String RECV_UUID = "0000fff4-0000-1000-8000-00805f9b34fb";
-	private String SEND_UUID = "0000fff1-0000-1000-8000-00805f9b34fb";
-	private String SERVICE_RECV_REGION = "0000fff0-0000-1000-8000-00805f9b34fb";
-	private String SERVICE_SEND_REGION = "0000fff0-0000-1000-8000-00805f9b34fb";
+	private String UUID_COMM_SERVICE = "0000fff0-0000-1000-8000-00805f9b34fb";
+	private String UUID_CHARACTER_WRITE = "0000fff1-0000-1000-8000-00805f9b34fb";
+	private String UUID_CHARACTER_NOTIFY = "0000fff4-0000-1000-8000-00805f9b34fb";
 
 	private boolean mScanning;
 	private int mConnectionState = BT_STATUS_DISCONNECT;
-	private String mBluetoothDeviceAddress;
 
 	private BluetoothAdapter mBluetoothAdapter;
 	private BluetoothGatt mBluetoothGatt;
-	private BluetoothGattService mBluetoothGattService;
-	private BluetoothGattCharacteristic mBluetoothGattCharacter;
-
-	// for debug
-	private int write_callback_count;
-
-	private Queue<byte[]> mQueue;
+	private BluetoothGattService mGattService;
+	private BluetoothGattCharacteristic mWriteCharacter;
+	private BluetoothGattCharacteristic mNotifyCharacter;
 
 	private DevCallBack mBtCallBack;
 	private Context mContext;
-
-	private Runnable mScanRunnable;
-
 	private Boolean mDeviceBusyKey = false;
 
-	public Ble() {
-		//mContext = context;
+	private final int COUNTS_MAX = 1024 * 10;
+	private byte[] mRecvBuffer = new byte[COUNTS_MAX];
+	private byte[] mSendBuffer = new byte[COUNTS_MAX];
+	private int mIdxWriteRecv;
+	private int mIdxReadRecv;
+	private Semaphore mSemSend;
+	private Semaphore mWorkStopSem;
+	private SendThread mSendThread;
+
+	private BoundedBuffer mSendBuf = new BoundedBuffer();
+	private BoundedBuffer mRecvBuf = new BoundedBuffer();
+
+	private static Ble mInstance;
+
+	private Ble() {
 	}
+
+	public static Ble getInstance() {
+        if (mInstance == null) {
+			mInstance = new Ble();
+		}
+
+		return mInstance;
+    }
 
 	public int initDev(Context context, DevCallBack recv) {
 		if (!context.getPackageManager().hasSystemFeature(
@@ -88,116 +98,140 @@ public class Ble {
 		
 		mBtCallBack = recv;
 
-		mQueue = new LinkedList<byte[]>();
-		mDeviceBusyKey = false;
+		mSemSend = new Semaphore(1);
+		mSendThread = new SendThread();
+		mSendThread.start();
 
 		return 1;
 	}
 
 	public void uninitDev() {
-		disconnect();
-		close();
 	}
 
-	public int sendData(byte[] data) {
-		Message.obtain(handler, MSG_SEND, data).sendToTarget();
-		return 0;
-
+	public void sendData(byte[] data, int ofs, int len) {
+		try {
+			mSendBuf.put(data, ofs, len);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 
-	private void recvData(byte[] recv) {
-		// int bytes;
-		// int len;
-		//
-		// while (true) {
-		// byte checksum = 0;
-		// len = ((int)recv[2]) & 0xFF;
-		//
-		// bytes = len + 3;
-		// for (int i = 2; i < (bytes - 1); i++) {
-		// checksum = (byte) (checksum ^ recv[i]);
-		// }
-		//
-		// if (checksum != recv[bytes - 1]) {
-		//
-		// Misc.logd("bt checksum error");
-		// continue;
-		// }
-		//
-		// if (mBtRecv != null)
-		// mBtRecv.onDataRecv(recv, 0, bytes);
-		// }
+	private int recvData(byte[] recv, int ofs, int len) {
+		int ret = 0;
+		try {
+			ret = mRecvBuf.take(recv, ofs, len);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+		return ret;
 	}
 
 	public int getDevStatus() {
 		return mConnectionState;
 	}
 
-	public String getAddress() {
-		return mBluetoothDeviceAddress;
+	private class SendThread extends Thread {
+		@Override
+		public void run() {
+			byte[] buf = new byte[20];
+			while (true) {
+				int count = 0;
+				try {
+					count = mSendBuf.take(buf, 0, buf.length);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+
+				if (count == 0) continue;
+				try {
+					mSemSend.acquire();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+
+				byte[] sendBuf = new byte[count];
+				System.arraycopy(buf, 0, sendBuf, 0, count);
+				mWriteCharacter.setValue(sendBuf);
+				mBluetoothGatt.writeCharacteristic(mWriteCharacter);
+			}
+		}
 	}
 
-	public void scanDevice(final boolean enable) {
-		Message.obtain(handler, MSG_SCAN, enable).sendToTarget();
+	public void scanDevice(boolean enable) {
+		if (mConnectionState != BT_STATUS_DISCONNECT) {
+			return;
+		}
+
+		Runnable runnable = new Runnable() {
+			@Override
+			public void run() {
+				mScanning = false;
+				mBluetoothAdapter.stopLeScan(mLeScanCallback);
+			}
+		};
+		//if (enable) {
+	    //}
+
+		handler.postDelayed(runnable, SCAN_PERIOD);
+		mScanning = true;
+		mBluetoothAdapter.startLeScan(mLeScanCallback);
 	}
 
-	private BluetoothAdapter.LeScanCallback mLeScanCallback = new BluetoothAdapter.LeScanCallback() {
-
+	private BluetoothAdapter.LeScanCallback mLeScanCallback =
+			new BluetoothAdapter.LeScanCallback() {
 		@Override
 		public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
 			Misc.logd("scan_result:" + device.getName() + ",uuid:"
 					+ device.getAddress());
-			if (device.getName().equals("POPSECU-DUAL SPP")) {
-				mBtCallBack.onScanDevice(device);
-				if (getDevStatus() == BT_STATUS_CONNECTED
-						|| getDevStatus() == BT_STATUS_CONNECTING) {
+			if (device.getName().equals("POPSECU-DUAL SPP") |
+					device.getName().equals("loxer")) {
+
+				Message msg = handler.obtainMessage(MSG_SCAN, device);
+				handler.sendMessage(msg);
+
+				if (mConnectionState == BT_STATUS_CONNECTED
+						|| mConnectionState == BT_STATUS_CONNECTING) {
 					return;
 				}
 
-				//if (mLeDevices != null
-						//&& mLeDevices.contains(device.getAddress())) {
-				connect(device.getAddress());
-				//}
+				mBluetoothGatt = device.connectGatt(mContext, true, mBluetoothGattCallback);
+				mConnectionState = BT_STATUS_CONNECTING;
 			}
 		}
 	};
 
-	private final BluetoothGattCallback mBluetoothGattCallback = new BluetoothGattCallback() {
-
+	private final BluetoothGattCallback mBluetoothGattCallback =
+			new BluetoothGattCallback() {
 		@Override
-		public void onConnectionStateChange(BluetoothGatt gatt, int status,
-				int newState) {
+		public void onConnectionStateChange(BluetoothGatt gatt,
+											int status, int newState) {
 			if (newState == BluetoothGatt.STATE_CONNECTED) {
 				Misc.logd("ble connect success" + gatt.getDevice().getAddress());
-				mConnectionState = BT_STATUS_CONNECTED;
-				Message.obtain(handler, MSG_CLEARDATA).sendToTarget();
+				//mConnectionState = BT_STATUS_CONNECTED;
 				gatt.discoverServices();
-				mBtCallBack.onConnecting(gatt.getDevice(),
-						BT_STATUS_CONNECTED);
-
 			} else if (newState == BluetoothGatt.STATE_DISCONNECTED) {
 				Misc.logd("ble connect failer" + gatt.getDevice().getAddress());
 				mConnectionState = BT_STATUS_DISCONNECT;
-				mBtCallBack.onConnecting(gatt.getDevice(),
-						BT_STATUS_CONNECT_FAILED);
-				disconnect();
-				close();
+				gatt.close();
 			} else {
-				mBtCallBack.onConnecting(gatt.getDevice(),
-						BT_STATUS_CONNECT_FAILED);
+				mConnectionState = BT_STATUS_DISCONNECT;
 			}
-			
-			//mBtCallBack.onStatusChange(Common.BluetoothVersionType.BLUETOOTH_LOW_ENERGY,
-					//mConnectionState, gatt.getDevice().getAddress());
+
+			Message msg = handler.obtainMessage(MSG_STATUS, mConnectionState, 0);
+			handler.sendMessage(msg);
 		}
 
 		@Override
 		public void onServicesDiscovered(BluetoothGatt gatt, int status) {
-			// TODO Auto-generated method stub
 			super.onServicesDiscovered(gatt, status);
 			Misc.logd("service discovered " + status);
 			if (status == BluetoothGatt.GATT_SUCCESS) {
-				scanCharacteristics(gatt);
+				if (scanCharacteristics(gatt)) {
+					mConnectionState = BT_STATUS_CONNECTED;
+					Message msg = handler.obtainMessage(MSG_STATUS, mConnectionState, 0);
+					handler.sendMessage(msg);
+				}
 			}
 		}
 
@@ -206,112 +240,43 @@ public class Ble {
 				BluetoothGattCharacteristic characteristic, int status) {
 			super.onCharacteristicWrite(gatt, characteristic, status);
 			if (status == BluetoothGatt.GATT_SUCCESS) {
-				write_callback_count++;
-				Misc.logd("send call count: " + write_callback_count);
+				Misc.logd("ble write success");
 			} else {
-				Misc.logd("write_callback_count: failed");
+				Misc.loge("ble write failed");
 			}
 
-			if (mQueue.size() > 0) {
-				writeData();
-			} else {
-				mDeviceBusyKey = false;
-			}
-
+			mSemSend.release();
 		}
 
 		@Override
 		public void onCharacteristicChanged(BluetoothGatt gatt,
 				BluetoothGattCharacteristic characteristic) {
 			super.onCharacteristicChanged(gatt, characteristic);
-			// if (RECV_UUID.equals(characteristic.getUuid().toString())) {
-			// onble_callback_count++;
-			// recvData(characteristic.getValue());
-			// Misc.logd(onble_callback_count + ",onCharacteristicChanged: "
-			// + characteristic.getUuid() + ","
-			// + characteristic.getValue());
-			// }
+			byte[] recv = characteristic.getValue();
+			try {
+				mRecvBuf.put(recv, 0, recv.length);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 
 	};
 
-	private void scanCharacteristics(BluetoothGatt gatt) {
-		List<BluetoothGattService> list = gatt.getServices();
-		for (BluetoothGattService service : list) {
-			Misc.logd("serviceName:" + service.toString());
-			List<BluetoothGattCharacteristic> characteristics = service
-					.getCharacteristics();
-			for (BluetoothGattCharacteristic characteristic : characteristics) {
-				if (((characteristic.getProperties() & (BluetoothGattCharacteristic.PROPERTY_WRITE | BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE)) != 0)
-				/*
-				 * && ((characteristic.getProperties() &
-				 * BluetoothGattCharacteristic.PROPERTY_NOTIFY) != 0)
-				 */) {
+	private boolean scanCharacteristics(BluetoothGatt gatt) {
+		boolean flag = false;
 
-					SERVICE_SEND_REGION = characteristic.getService().getUuid()
-							.toString();
-					SEND_UUID = characteristic.getUuid().toString();
-					Misc.logd("SEND_UUID:" + SEND_UUID);
-					Misc.logd("SERVICE_SEND_REGION:" + SERVICE_SEND_REGION);
-				}
-
-				if ((characteristic.getProperties() & (BluetoothGattCharacteristic.PROPERTY_NOTIFY)) != 0) {
-
-					SERVICE_RECV_REGION = characteristic.getService().getUuid()
-							.toString();
-					RECV_UUID = characteristic.getUuid().toString();
-					Misc.logd("REC_UUID:" + RECV_UUID);
-					// TODO
-					gatt.setCharacteristicNotification(characteristic, true);
-					// BluetoothGattDescriptor descriptor =
-					// characteristic.getDescriptor(
-					// UUID.fromString(SERVICE_SEND_REGION));
-					// descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-					// mBluetoothGatt.writeDescriptor(descriptor);
-				}
-			}
-		}
-	}
-
-	public boolean connect(final String address) {
-
-		if (mBluetoothAdapter == null || address == null) {
-			return false;
-		}
-
-		if (mBluetoothDeviceAddress != null && mBluetoothGatt != null) {
-			if (mBluetoothDeviceAddress.equals(address)) {
-
-				if (mBluetoothGatt.connect()) {
-					Misc.logd("has to connect the same connection");
-					mConnectionState = BT_STATUS_CONNECTING;
-					return true;
-				} else {
-					return false;
-				}
-			} else {
-				if (mBluetoothGatt.connect()) {
-					disconnect();
-				}
+		mGattService = gatt.getService(UUID.fromString(UUID_COMM_SERVICE));
+		if (mGattService != null) {
+			mWriteCharacter = mGattService.getCharacteristic(
+					UUID.fromString(UUID_CHARACTER_WRITE));
+			mNotifyCharacter = mGattService.getCharacteristic(
+					UUID.fromString(UUID_CHARACTER_NOTIFY));
+			if ((mWriteCharacter != null) && (mNotifyCharacter != null)) {
+				flag = gatt.setCharacteristicNotification(mNotifyCharacter, true);;
 			}
 		}
 
-		final BluetoothDevice device = mBluetoothAdapter
-				.getRemoteDevice(address);
-		if (device == null) {
-			Misc.logd("device not found:" + address);
-			return false;
-		}
-
-		mBluetoothGatt = device.connectGatt(mContext, false,
-				mBluetoothGattCallback);
-		Misc.logd("trying to connect: " + address);
-		mBluetoothDeviceAddress = address;
-		mConnectionState = BT_STATUS_CONNECTING;
-
-		mBtCallBack.onConnecting(device, BT_STATUS_CONNECTING);
-
-		return true;
+		return flag;
 	}
 
 	public void disconnect() {
@@ -324,109 +289,98 @@ public class Ble {
 		return;
 	}
 
-	public void clearData() {
-		if (mQueue != null && mQueue.size() > 0) {
-			mQueue.clear();
-		}
-	}
-
-	public void close() {
-		if (mBluetoothGatt == null) {
-			return;
-		}
-		mBluetoothGatt.close();
-		mBluetoothGatt = null;
-	}
-	
-	public int writeData() {
-
-		if (mBluetoothGatt == null || mBluetoothAdapter == null) {
-			return 0;
-		}
-
-		mBluetoothGattService = mBluetoothGatt.getService(UUID
-				.fromString(SERVICE_SEND_REGION));
-
-		if (mBluetoothGattService == null) {
-			return 0;
-		} else {
-			mBluetoothGattCharacter = mBluetoothGattService
-					.getCharacteristic(UUID.fromString(SEND_UUID));
-			if (mBluetoothGattCharacter == null) {
-				return 0;
-			}
-		}
-
-		if (mBluetoothGattCharacter != null) {
-			mBluetoothGattCharacter.setValue(mQueue.poll());
-			mBluetoothGatt.writeCharacteristic(mBluetoothGattCharacter);
-			return 1;
-		}
-		return 0;
-	}
-	
 	private Handler handler = new Handler(Looper.getMainLooper()) {
-
 		@Override
 		public void handleMessage(Message msg) {
-			super.handleMessage(msg);
+			if (mBtCallBack == null) {
+				return;
+			}
+
 			switch (msg.what) {
-			case MSG_SEND:
-				byte[] byteData = (byte[]) msg.obj;
-				if (mConnectionState == BT_STATUS_CONNECTED) {
-					mQueue.add(byteData);
-					if (!mDeviceBusyKey) {
-						mDeviceBusyKey = true;
-						writeData();
-					}
-				}
-				break;
-			case MSG_CONNECT:
+				case MSG_STATUS:
+					mBtCallBack.onStatusChange(msg.arg1);
+					break;
+				case MSG_SCAN:
+					mBtCallBack.onScanDevice((BluetoothDevice)msg.obj);
+					break;
+			}
+		}
+	};
 
-				break;
-			case MSG_CLEARDATA:
-				clearData();
-				break;
-			case MSG_SCAN:
-				boolean enable = (Boolean) msg.obj ;
-				if (enable) {
-					if (mScanRunnable == null) {
-						mScanRunnable = new Runnable() {
-							@Override
-							public void run() {
-								mScanning = false;
-								mBluetoothAdapter.stopLeScan(mLeScanCallback);
-								//onScanning(mScanning);
-							}
-						};
-					} else {
-						handler.removeCallbacks(mScanRunnable);
+	class BoundedBuffer {
+		final int MAX_COUNTS = 1024 * 10;
+		final Lock lock = new ReentrantLock();
+		final Condition notFull = lock.newCondition();
+		final Condition notEmpty = lock.newCondition();
+
+		final byte[] items = new byte[MAX_COUNTS];
+		int putptr, takeptr, count;
+
+		public void reset() {
+			putptr = 0;
+			takeptr = 0;
+			count = 0;
+		}
+
+		public void put(byte[] buf, int ofs, int len) throws InterruptedException {
+			int total = 0;
+
+			lock.lock();
+			try {
+				while (total < len) {
+					while (count == MAX_COUNTS) {
+						notFull.await();
 					}
 
-					handler.postDelayed(mScanRunnable, SCAN_PERIOD);
-					mScanning = true;
-					mBluetoothAdapter.startLeScan(mLeScanCallback);
-				} else {
-					mScanning = false;
-					mBluetoothAdapter.stopLeScan(mLeScanCallback);
+					if (count == 0) {
+						notEmpty.signal();
+					}
+
+					int wc = MAX_COUNTS - count;
+					wc = wc > len ? len : wc;
+					for (int i = 0; i < wc; i++) {
+						items[putptr] = buf[ofs + total + i];
+						putptr = (putptr + 1) % MAX_COUNTS;
+					}
+
+
+
+					count += wc;
+					total += wc;
 				}
-				//onScanning(mScanning);
-				break ;
-			default:
-				break;
+			} finally {
+				lock.unlock();
 			}
 		}
 
-	};
-	
-	
-	
+		public int take(byte[] buf, int ofs, int size) throws InterruptedException {
+			lock.lock();
+			try {
+				while (count == 0) {
+					notEmpty.await();
+				}
+
+				if (count == MAX_COUNTS) {
+					notFull.signal();
+				}
+
+				int rc = count > size ? size : count;
+				for (int i = 0; i < rc; i++) {
+					buf[ofs + i] = items[takeptr];
+					takeptr = (takeptr + 1) % MAX_COUNTS;
+				}
+
+				count -= rc;
+				return rc;
+			} finally {
+				lock.unlock();
+			}
+		}
+	}
+
 	public interface DevCallBack{
-		public void onDataRecv(byte[] buf, int offset, int count);
-		public void onStatusChange(int type , int status , String address);
+		public void onStatusChange(int status);
 		public void onScanDevice(BluetoothDevice device);
-		public void onScanning(boolean flag);
-		public void onConnecting(BluetoothDevice device , int type) ;
 	};
 }
 
