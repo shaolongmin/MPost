@@ -8,8 +8,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
 
 import com.popsecu.sdk.CfgInfo;
+import com.popsecu.sdk.Controller;
+import com.popsecu.sdk.Misc;
 import com.zoneol.mpost.R;
 import com.zoneol.mpost.fragment.KeyValueDialogFragment;
 
@@ -60,6 +63,7 @@ public class SettingKeyValueAdapter extends BaseAdapter implements View.OnClickL
             convertView = LayoutInflater.from(mContext).inflate(R.layout.keyvalue_item_layout, null);
             viewHolder.keyvalue_item_key = (Button)convertView.findViewById(R.id.setting_keyvalue_key) ;
             viewHolder.keyvalue_item_value = (Button)convertView.findViewById(R.id.setting_keyvalue_value) ;
+            viewHolder.keyvalue_item_linearn = (LinearLayout)convertView.findViewById(R.id.setting_keyvalue_linearn) ;
             convertView.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
@@ -80,6 +84,14 @@ public class SettingKeyValueAdapter extends BaseAdapter implements View.OnClickL
             viewHolder.keyvalue_item_key.setEnabled(false);
         }
 
+        viewHolder.keyvalue_item_linearn.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                Misc.logd("linear long onclick");
+                return false;
+            }
+        });
+
         return convertView;
     }
 
@@ -89,7 +101,15 @@ public class SettingKeyValueAdapter extends BaseAdapter implements View.OnClickL
         int position = (int) v.getTag() ;
         CfgInfo.CfgKeyValue keyValue = mList.get(position) ;
         if (id == R.id.setting_keyvalue_key) {
+           List<String> list =  Controller.getInstance().getTreeInfoImp().getAppKeyList();
+            ArrayList<String> arrayStrList = new ArrayList<>() ;
+            for (String str : list)  {
+                arrayStrList.add(str) ;
+            }
 
+            FragmentManager fm = activity.getSupportFragmentManager() ;
+            KeyValueDialogFragment dialog = KeyValueDialogFragment.newInstance(false , position , arrayStrList ,true) ;
+            dialog.show(fm, "");
         } else {
             ArrayList<String> arrayStrList = new ArrayList<>() ;
             for (String str : keyValue.valueList)  {
@@ -97,11 +117,11 @@ public class SettingKeyValueAdapter extends BaseAdapter implements View.OnClickL
             }
             if (keyValue.isValueEditable) {
                 FragmentManager fm = activity.getSupportFragmentManager() ;
-                KeyValueDialogFragment dialog = KeyValueDialogFragment.newInstance(true , position , arrayStrList) ;
+                KeyValueDialogFragment dialog = KeyValueDialogFragment.newInstance(true , position , arrayStrList ,false) ;
                 dialog.show(fm, "");
             } else {
                 FragmentManager fm = activity.getSupportFragmentManager() ;
-                KeyValueDialogFragment dialog = KeyValueDialogFragment.newInstance(false , position , arrayStrList) ;
+                KeyValueDialogFragment dialog = KeyValueDialogFragment.newInstance(false , position , arrayStrList , false) ;
                 dialog.show(fm, "");
             }
         }
@@ -110,5 +130,6 @@ public class SettingKeyValueAdapter extends BaseAdapter implements View.OnClickL
     private class ViewHolder{
         private Button keyvalue_item_key ;
         private Button keyvalue_item_value ;
+        private LinearLayout keyvalue_item_linearn ;
     }
 }
