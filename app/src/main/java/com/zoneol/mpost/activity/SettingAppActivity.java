@@ -1,7 +1,8 @@
 package com.zoneol.mpost.activity;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -13,11 +14,12 @@ import com.popsecu.sdk.Controller;
 import com.popsecu.sdk.Misc;
 import com.zoneol.mpost.R;
 import com.zoneol.mpost.fragment.KeyValueDialogFragment;
+import com.zoneol.mpost.fragment.SettingAppDialogFragment;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SettingAppActivity extends AppCompatActivity implements AdapterView.OnItemLongClickListener , KeyValueDialogFragment.KeyValueListener{
+public class SettingAppActivity extends AppCompatActivity implements AdapterView.OnItemLongClickListener , KeyValueDialogFragment.KeyValueListener , SettingAppDialogFragment.AppToastListener {
 
     private List<CfgInfo.CfgKeyValue> list = new ArrayList<>();
     private SettingKeyValueAdapter mSettingKeyValueAdapter ;
@@ -78,6 +80,9 @@ public class SettingAppActivity extends AppCompatActivity implements AdapterView
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
         Misc.logd("app long click");
+        FragmentManager fm = getSupportFragmentManager() ;
+        SettingAppDialogFragment dialog = SettingAppDialogFragment.newInstance(0 , position) ;
+        dialog.show(fm, "");
         return false;
     }
 
@@ -90,5 +95,11 @@ public class SettingAppActivity extends AppCompatActivity implements AdapterView
             list.get(position).defaultValue = value ;
             mSettingKeyValueAdapter.notifyDataSetChanged();
         }
+    }
+
+    @Override
+    public void onAppToastListener(int position) {
+        Controller.getInstance().getTreeInfoImp().delAppKv(position);
+        mSettingKeyValueAdapter.notifyDataSetChanged();
     }
 }

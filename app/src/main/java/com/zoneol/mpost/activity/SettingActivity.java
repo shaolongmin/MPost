@@ -61,6 +61,10 @@ public class SettingActivity extends AppCompatActivity implements AdapterView.On
         if (id == android.R.id.home) {
             finish();
             return true;
+        } else if (id == R.id.setting_menu_get) {
+
+        } else if (id == R.id.setting_menu_upload) {
+
         }
 
         return super.onOptionsItemSelected(item);

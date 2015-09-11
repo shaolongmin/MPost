@@ -22,7 +22,7 @@ import java.util.List;
 /**
  * Created by GTW on 2015/9/9.
  */
-public class SettingKeyValueAdapter extends BaseAdapter implements View.OnClickListener{
+public class SettingKeyValueAdapter extends BaseAdapter implements View.OnClickListener , View.OnLongClickListener{
 
     private Context mContext ;
     private List<CfgInfo.CfgKeyValue> mList = new ArrayList<>();
@@ -75,22 +75,16 @@ public class SettingKeyValueAdapter extends BaseAdapter implements View.OnClickL
 
         viewHolder.keyvalue_item_key.setTag(position);
         viewHolder.keyvalue_item_key.setOnClickListener(this);
+        viewHolder.keyvalue_item_key.setOnLongClickListener(this);
         viewHolder.keyvalue_item_value.setTag(position);
         viewHolder.keyvalue_item_value.setOnClickListener(this);
+        viewHolder.keyvalue_item_value.setOnLongClickListener(this);
 
         if (mIsApp) {
             viewHolder.keyvalue_item_key.setEnabled(true);
         } else {
             viewHolder.keyvalue_item_key.setEnabled(false);
         }
-
-        viewHolder.keyvalue_item_linearn.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                Misc.logd("linear long onclick");
-                return false;
-            }
-        });
 
         return convertView;
     }
@@ -125,6 +119,19 @@ public class SettingKeyValueAdapter extends BaseAdapter implements View.OnClickL
                 dialog.show(fm, "");
             }
         }
+    }
+
+    @Override
+    public boolean onLongClick(View v) {
+        int id = v.getId() ;
+        int position = (int) v.getTag() ;
+        if (id == R.id.setting_keyvalue_key) {
+            Misc.logd("linear long onclick");
+        } else {
+            Misc.logd("linear long onclick");
+
+        }
+        return false;
     }
 
     private class ViewHolder{
