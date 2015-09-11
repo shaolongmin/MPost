@@ -207,9 +207,12 @@ public class TreeInfoImp {
                     kv.valueList.add(String.format("%s_%d", cname, i));
                 }
             }
+            kv.isValueEditable = false;
         } else if (kvInfo.limit.equals(CfgInfo.TYPE_VIEW_SELECT)) {
             kv.valueList = new ArrayList<String>(kvInfo.valueList);
+            kv.isValueEditable = false;
         } else {
+            kv.isValueEditable = true;
         }
     }
 
