@@ -97,7 +97,6 @@ public class Ble {
 		}
 		
 		mBtCallBack = recv;
-
 		mSemSend = new Semaphore(1);
 		mSendThread = new SendThread();
 		mSendThread.start();
@@ -141,6 +140,10 @@ public class Ble {
 					count = mSendBuf.take(buf, 0, buf.length);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
+				}
+
+				if (mConnectionState != BT_STATUS_CONNECTED) {
+					continue;
 				}
 
 				if (count == 0) continue;
@@ -317,9 +320,11 @@ public class Ble {
 		int putptr, takeptr, count;
 
 		public void reset() {
+			lock.lock();
 			putptr = 0;
 			takeptr = 0;
 			count = 0;
+			lock.unlock();
 		}
 
 		public void put(byte[] buf, int ofs, int len) throws InterruptedException {
@@ -342,8 +347,6 @@ public class Ble {
 						items[putptr] = buf[ofs + total + i];
 						putptr = (putptr + 1) % MAX_COUNTS;
 					}
-
-
 
 					count += wc;
 					total += wc;
