@@ -43,24 +43,257 @@ public class CommInteface {
         mWorkThread.start();
     }
 
-    public byte[] getInstallPackageInfo() {
-        byte subCmd = 0x01;
+    public void getInstallPackageInfo() {
+        TaskData task = new TaskData();
+        task.type = TaskData.TaskType.TYPE_GET_PACKAGEINFO;
+        addTask(task);
+    }
+
+    public void getUserConfig() {
+        TaskData task = new CommInteface.TaskData();
+        task.type = TaskData.TaskType.TYPE_GET_USERINFO;
+        addTask(task);
+    }
+
+    public void setUserConfig(byte[] cfgData) {
+        TaskData task = new CommInteface.TaskData();
+        task.type = TaskData.TaskType.TYPE_SET_USERINFO;
+        task.data = cfgData;
+        addTask(task);
+    }
+
+    public void getTerminalInfo() {
+        TaskData task = new CommInteface.TaskData();
+        task.type = TaskData.TaskType.TYPE_GET_TERMINAL;
+        addTask(task);
+    }
+
+    private void addTask(TaskData task) {
+        mTaskQueue.add(task);
+        mWorkSem.release();
+    }
+
+    private int _getInstallPackageInfo(BleHandler bleHandler) {
+        int ret;
+        byte[] buf = new byte[1024 * 10];
         byte[] data = new byte[1];
         data[0] = (byte)CommProtocol.CMD_STC_CONTROL_PACKAGE_INFO;
 
         byte[] sendData = CommProtocol.packageData(CommProtocol.SETP_START, CommProtocol.CMD_STC_CONTROL,
                 (byte)0, data, data.length);
+        ret = bleHandler.send(sendData, 0, sendData.length);
+        if (ret == -1) {
+            return  -1;
+        }
 
-        return null;
+        ret = recvResponseData(bleHandler, buf, buf.length);
+        if (ret == -1) {
+            return -1;
+        }
+
+        return ret;
     }
 
-    private int ReadLenData(byte[] buf, int ofs, int len) {
+    private byte[] _getTerminalInfo(BleHandler bleHandler) {
+        int ret;
+        byte[] buf = new byte[1024 * 10];
+        byte[] data = new byte[1];
+        data[0] = (byte)CommProtocol.CMD_STC_CONTROL_TERM_INFO;
+
+        byte[] sendData = CommProtocol.packageData(CommProtocol.SETP_START, CommProtocol.CMD_STC_CONTROL,
+                (byte)0, data, data.length);
+        ret = bleHandler.send(sendData, 0, sendData.length);
+        if (ret == -1) {
+            return  null;
+        }
+
+        ret = recvResponseData(bleHandler, buf, buf.length);
+        if (ret == -1) {
+            return null;
+        }
+
+        int dataLen = ret - 9 - 1;
+        byte[] conf = new byte[dataLen];
+        System.arraycopy(buf, 9, conf, 0, dataLen);
+        return conf;
+    }
+
+    private byte[] _getUserConfig(BleHandler bleHandler) {
+        int ret;
+        byte[] buf = new byte[1024 * 10];
+        byte[] data = new byte[1];
+        data[0] = (byte)CommProtocol.CMD_STC_CONTROL_CFG_INFO;
+
+        byte[] sendData = CommProtocol.packageData(CommProtocol.SETP_START, CommProtocol.CMD_STC_CONTROL,
+                (byte)0, data, data.length);
+        ret = bleHandler.send(sendData, 0, sendData.length);
+        if (ret == -1) {
+            return  null;
+        }
+
+        ret = recvResponseData(bleHandler, buf, buf.length);
+        if (ret == -1) {
+            return null;
+        }
+
+        int dataLen = ret - 9 - 1;
+        byte[] conf = new byte[dataLen];
+        System.arraycopy(buf, 9, conf, 0, dataLen);
+        return conf;
+    }
+
+    private int _setUserConfig(BleHandler bleHandler, byte[] cfgData) {
+        int ret;
+        byte[] buf = new byte[1024];
+        byte[] data = new byte[100];
+        data[0] = (byte)CommProtocol.CMD_STC_CONTROL_CFG_INSTALL;
+        data[1] = 0;
+        data[2] = 0;
+        data[3] = 0;
+        data[4] = 0;
+        String fileName = "USERCFG\0";
+        for (int i = 0; i < fileName.length(); i++) {
+            data[5 + i] = fileName.getBytes()[i];
+        }
+        int dataLen = 8 + fileName.length();
+
+        byte[] sendData = CommProtocol.packageData(CommProtocol.SETP_START, CommProtocol.CMD_STC_CONTROL,
+                (byte)0, data, dataLen);
+        ret = bleHandler.send(sendData, 0, sendData.length);
+        if (ret == -1) {
+            return  1;
+        }
+        ret = recvResponseData(bleHandler, buf, buf.length);
+        if (ret == -1) {
+            return 1;
+        }
+        if (buf[2] != CommProtocol.CMD_STC_CONTROL) {
+            return -1;
+        }
+
+        data = new byte[cfgData.length + 1];
+        data[0] = (byte)CommProtocol.CMD_STC_CONTROL_CFG_INSTALL;
+        System.arraycopy(cfgData, 0, data, 1, cfgData.length);
+        sendData = CommProtocol.packageData(CommProtocol.SETP_DATA, CommProtocol.CMD_STC_CONTROL,
+                (byte)0, data, data.length);
+        ret = bleHandler.send(sendData, 0, sendData.length);
+        if (ret == -1) {
+            return  1;
+        }
+        ret = recvResponseData(bleHandler, buf, buf.length);
+        if (ret == -1) {
+            return 1;
+        }
+        if (buf[2] != CommProtocol.CMD_STC_CONTROL) {
+            return -1;
+        }
+
+        data = new byte[1];
+        data[0] = (byte)CommProtocol.CMD_STC_CONTROL_CFG_INSTALL;
+        sendData = CommProtocol.packageData(CommProtocol.SETP_STOP, CommProtocol.CMD_STC_CONTROL,
+                (byte)0, data, data.length);
+        ret = bleHandler.send(sendData, 0, sendData.length);
+        if (ret == -1) {
+            return  1;
+        }
+        ret = recvResponseData(bleHandler, buf, buf.length);
+        if (ret == -1) {
+            return 1;
+        }
+        if (buf[2] != CommProtocol.CMD_STC_CONTROL) {
+            return -1;
+        }
+
         return 0;
+    }
+
+
+
+    private boolean readLenData(BleHandler handler, byte[] buf, int ofs, int len) {
+        int ret;
+        int total = 0;
+
+        while (total < len) {
+            if ((ret = handler.recv(buf, ofs + total, len - total)) == -1) {
+                return false;
+            }
+
+            total += ret;
+        }
+
+        return true;
+    }
+
+    private int recvResponseData(BleHandler hander, byte[] buf, int size) {
+        int ret;
+        int len;
+        byte lrc = 0;
+
+        if (!readLenData(hander, buf, 0, 1)) {
+            return -1;
+        }
+
+        if (buf[0] != CommProtocol.HEADER) {
+            return -1;
+        }
+
+        if (!readLenData(hander, buf, 1, 7)) {
+            return -1;
+        }
+
+        len = ((buf[6] & 0xFF) << 8) | (buf[7] & 0xFF);
+        if (len > size) {
+            return -1;
+        }
+
+        if (!readLenData(hander, buf, 8, len + 1)) {
+            return -1;
+        }
+
+        for (int i = 1; i < len + 9; i++)
+        {
+            lrc ^= buf[i];
+        }
+
+        if (lrc != 0)
+        {
+            Misc.logd("check sum error");
+            return -1;
+        }
+
+        return  len + 9;
+    }
+
+    private boolean handShake(BleHandler handler) {
+        byte[] shake = new byte[1];
+        byte[] buf = new byte[1];
+        shake[0] = 'S';
+        int counts = 3;
+
+        while (counts-- > 0) {
+            if (handler.send(shake, 0, 1) == -1) {
+                return false;
+            }
+
+            if (handler.recv(buf, 0, buf.length, 2000) == -1) {
+                return false;
+            }
+
+            if (buf[0] == 'A')
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private class WorkThread extends Thread {
         @Override
         public void run() {
+            //byte[] recvBuf = new byte[1024];
+            int ret;
+
             while (mWorkFlag) {
                 BleHandler bleHandler = null;
 
@@ -84,14 +317,29 @@ public class CommInteface {
                 }
 
                 //for test
-                byte[] buf = new byte[100];
+                /*
+                byte[] rbuf = new byte[10];
+                byte[] buf = new byte[10];
                 for (int i = 0; i < buf.length; i++) {
                     buf[i] = 'S';
                 }
                 while (true) {
-                    int ret = bleHandler.send(buf, 0, buf.length);
-                    if (ret == -1) {
-                        Misc.logd("write data failed");
+//                    ret = bleHandler.send(buf, 0, buf.length);
+//                    if (ret == -1) {
+//                        Misc.logd("write data failed");
+//                        break;
+//                    }
+
+                    ret =  bleHandler.recv(rbuf, 0, rbuf.length);
+                    Misc.logd("read data len " + ret);
+
+                    if (ret != -1) {
+                        ret = bleHandler.send(buf, 0, buf.length);
+                        if (ret == -1) {
+                            Misc.logd("write data failed");
+                            break;
+                        }
+                    } else {
                         break;
                     }
 
@@ -101,37 +349,79 @@ public class CommInteface {
                         e.printStackTrace();
                     }
                 }
-
-                /*
-                try {
-                    mWorkSem.acquire();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    continue;
-                }
-
-                TaskData task = mTaskQueue.poll();
-                if (task == null) {
-                    continue;
-                }
-
-                if (task.type == TaskData.TYPE_GET_PACKAGEINFO ) {
-                    //Event evnt = new Event();
-                }
                 */
+
+
+                ///*
+                while (mWorkFlag) {
+                    try {
+                        mWorkSem.acquire();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                        continue;
+                    }
+
+                    if (!handShake(bleHandler)) {
+                        break;
+                    }
+
+                    TaskData task = mTaskQueue.poll();
+                    if (task == null) {
+                        continue;
+                    }
+
+                    if (task.type == TaskData.TaskType.TYPE_GET_PACKAGEINFO ) {
+                        //Event evnt = new Event();
+                    } else if (task.type == TaskData.TaskType.TYPE_GET_USERINFO) {
+                        Event evnt = new Event(Event.EventType.GET_CONFIG);
+                        byte[] config = _getUserConfig(bleHandler);
+
+                        setUserConfig(config);
+                        if (config != null) {
+                            evnt.setIntParam(0);
+                            evnt.setObjectParam(config);
+                        } else {
+                            evnt.setIntParam(1);
+                        }
+
+                        EventCenter.getInstance().notifyEvent(evnt);
+                    } else if (task.type == TaskData.TaskType.TYPE_SET_USERINFO) {
+                        Event evnt = new Event(Event.EventType.GET_CONFIG);
+                        ret = _setUserConfig(bleHandler, task.data);
+//                        if (config != null) {
+//                            evnt.setIntParam(0);
+//                            evnt.setObjectParam(config);
+//                        } else {
+//                            evnt.setIntParam(1);
+//                        }
+                    } else if (task.type == TaskData.TaskType.TYPE_GET_TERMINAL) {
+                        byte[] ter = _getTerminalInfo(bleHandler);
+                    }
+                }
+
+                if (bleHandler != null) {
+                    bleHandler.close();
+                }
+
+                //*/
 
             }
         }
     }
 
-    public class TaskData {
-        public static final int TYPE_GET_PACKAGEINFO = 0;
+    private static class TaskData {
+        public enum TaskType {
+            TYPE_GET_PACKAGEINFO,
+            TYPE_GET_USERINFO,
+            TYPE_SET_USERINFO,
+            TYPE_GET_TERMINAL,
+        };
 
-        public int type;
+        public TaskType type;
         public byte[] data;
     }
 
-    public interface CommIntefaceCallBack {
-        void onCmdResponse(int subCmd, byte[] data);
-    }
+//    public interface CommIntefaceCallBack {
+//        void onCmdResponse(int subCmd, byte[] data);
+//    }
 }

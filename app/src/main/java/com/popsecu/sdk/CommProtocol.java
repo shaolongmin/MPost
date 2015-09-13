@@ -1,13 +1,13 @@
 package com.popsecu.sdk;
 
 public class CommProtocol {
-	
-	private static final byte HEADER = 0x01;
-	
-	private static final byte SBI = 'D';
-	private static final byte OS = 'O';
-	private static final byte KMM = 'K';
-	private static final byte STD_CMD = 'S';
+
+	public static final byte HEADER = 0x01;
+
+	public static final byte SBI = 'D';
+	public static final byte OS = 'O';
+	public static final byte KMM = 'K';
+	public static final byte STD_CMD = 'S';
 	
 	public static final byte SETP_START = 0x01;
 	public static final byte SETP_DATA = 0x02;
@@ -19,8 +19,9 @@ public class CommProtocol {
 
 	public static final byte CMD_STC_CONTROL_PACKAGE_INFO = 0x01;
 	public static final byte CMD_STC_CONTROL_PACKAGE_INSTALL = 0x02;
-	public static final byte CMD_STC_CONTROL_CFG_INFO = 0x05;
-	public static final byte CMD_STC_CONTROL_CFG_INSTALL = 0x06;
+	public static final byte CMD_STC_CONTROL_CFG_INFO = 0x06;
+	public static final byte CMD_STC_CONTROL_CFG_INSTALL = 0x05;
+	public static final byte CMD_STC_CONTROL_TERM_INFO = 0x07;
 
 
 	public static byte[] packageData(byte step, byte cmd, byte idx, byte[] data, int len) {

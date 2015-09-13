@@ -6,7 +6,7 @@ package com.popsecu.sdk;
 
 public class Event {
 	public enum EventType {
-		TYPE_01,
+		GET_CONFIG,
 		NONE
 	};
 
