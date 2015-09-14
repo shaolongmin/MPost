@@ -6,7 +6,11 @@ package com.popsecu.sdk;
 
 public class Event {
 	public enum EventType {
-		GET_CONFIG,
+        GET_PACKAGEINFO,
+        GET_USER_CFG,
+        SET_USER_CFG,
+        GET_TERMINAL,
+        UPATA_FW,
 		NONE
 	};
 

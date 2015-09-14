@@ -108,6 +108,24 @@ public class BleHandler {
         }
 
         procDisconnect();
+
+        mThreadFlag = false;
+        if (mSendThread != null) {
+            try {
+                mSendThread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            mSendThread = null;
+        }
+    }
+
+    public boolean isConnected() {
+        if (mConnectionState == BT_STATUS_CONNECTED) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public int send(byte[] data, int offset, int len) {
@@ -145,18 +163,7 @@ public class BleHandler {
     private void procDisconnect() {
         mSendBuf.close();
         mRecvBuf.close();
-
-        mThreadFlag = false;
         mSemSend.release();
-
-        if (mSendThread != null) {
-            try {
-                mSendThread.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            mSendThread = null;
-        }
     }
 
     private void scanDevice() {
