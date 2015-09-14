@@ -68,6 +68,12 @@ public class CommInteface {
         addTask(task);
     }
 
+    public void updateFirmware() {
+        TaskData task = new CommInteface.TaskData();
+        task.type = TaskData.TaskType.TYPE_UPATA_FW;
+        addTask(task);
+    }
+
     private void addTask(TaskData task) {
         mTaskQueue.add(task);
         mWorkSem.release();
@@ -207,6 +213,134 @@ public class CommInteface {
         return 0;
     }
 
+    private int _updateFirmware(BleHandler handler) {
+        PackageInfo pack = new PackageInfo();
+        if (!pack.openFile("/sdcard/package0.bin")) {
+            Misc.logd("read file error");
+            return -1;
+        }
+
+        int counts = pack.getPackItemCounts();
+        for (int i = 0; i < counts; i++) {
+            byte[] head = pack.getPackItemHeadData(i);
+            byte[] data = pack.getPackItemData(head);
+            if (data == null) {
+                Misc.logd("read package item error");
+                return -1;
+            }
+
+            int ret = downInfoToDev(handler, CommProtocol.CMD_STC_CONTROL_PACKAGE_INSTALL, head, data);
+            if (ret != 0) {
+                Misc.logd("update firmware error");
+                return -1;
+            }
+        }
+
+        return 0;
+    }
+
+    private byte[] loadInfoFromDev(BleHandler bleHandler, byte subCmd, byte[] startData, byte[] dataData) {
+        int ret;
+        byte[] buf = new byte[1024 * 10];
+
+        int dataLen;
+        if (startData != null) {
+            dataLen = startData.length;
+        } else {
+            dataLen = 0;
+        }
+        byte[] data = new byte[dataLen + 1];
+        data[0] = subCmd;
+        if (startData != null) {
+            System.arraycopy(startData, 0, data, 1, startData.length);
+        }
+
+        byte[] sendData = CommProtocol.packageData(CommProtocol.SETP_START, CommProtocol.CMD_STC_CONTROL,
+                (byte)0, data, data.length);
+        ret = bleHandler.send(sendData, 0, sendData.length);
+        if (ret == -1) {
+            return  null;
+        }
+
+        ret = recvResponseData(bleHandler, buf, buf.length);
+        if (ret == -1) {
+            return null;
+        }
+
+        dataLen = ret - 9 - 1;
+        byte[] recvData = new byte[dataLen];
+        System.arraycopy(buf, 9, recvData, 0, dataLen);
+        return recvData;
+    }
+
+    private int downInfoToDev(BleHandler bleHandler, byte subCmd, byte[] startData, byte[] dataData) {
+        int ret;
+        final  int PACK_SIZE = 1024 * 4;
+        byte[] buf = new byte[1024];
+        byte[] data = new byte[startData.length + 1];
+        data[0] = subCmd;
+        System.arraycopy(startData, 0, data, 1, startData.length);
+        byte[] sendData = CommProtocol.packageData(CommProtocol.SETP_START, CommProtocol.CMD_STC_CONTROL,
+                (byte)0, data, data.length);
+        ret = bleHandler.send(sendData, 0, sendData.length);
+        if (ret == -1) {
+            return  1;
+        }
+        ret = recvResponseData(bleHandler, buf, buf.length);
+        if (ret == -1) {
+            return 1;
+        }
+        if (buf[2] != CommProtocol.CMD_STC_CONTROL) {
+            return -1;
+        }
+
+        int pack = (dataData.length + PACK_SIZE - 1) / PACK_SIZE;
+        for (int i = 0; i < pack; i++) {
+            int sendLen;
+            if (i == (pack -1)) {
+                sendLen = dataData.length - i * PACK_SIZE;
+            } else {
+                sendLen = PACK_SIZE;
+            }
+
+            data = new byte[sendLen + 1];
+            data[0] = subCmd;
+            System.arraycopy(dataData, i * PACK_SIZE, data, 1, sendLen);
+            sendData = CommProtocol.packageData(CommProtocol.SETP_DATA, CommProtocol.CMD_STC_CONTROL,
+                    (byte)i, data, data.length);
+            ret = bleHandler.send(sendData, 0, sendData.length);
+            if (ret == -1) {
+                return -1;
+            }
+            ret = recvResponseData(bleHandler, buf, buf.length);
+            if (ret == -1) {
+                return -1;
+            }
+            if (buf[2] != CommProtocol.CMD_STC_CONTROL) {
+                return -1;
+            }
+        }
+
+        data = new byte[1];
+        data[0] = subCmd;
+        sendData = CommProtocol.packageData(CommProtocol.SETP_STOP, CommProtocol.CMD_STC_CONTROL,
+                (byte)0, data, data.length);
+        ret = bleHandler.send(sendData, 0, sendData.length);
+        if (ret == -1) {
+            return -1;
+        }
+        ret = recvResponseData(bleHandler, buf, buf.length);
+        if (ret == -1) {
+            return -1;
+        }
+        if (buf[2] != CommProtocol.CMD_STC_CONTROL) {
+            return -1;
+        }
+
+        return 0;
+    }
+
+
 
 
     private boolean readLenData(BleHandler handler, byte[] buf, int ofs, int len) {
@@ -230,23 +364,28 @@ public class CommInteface {
         byte lrc = 0;
 
         if (!readLenData(hander, buf, 0, 1)) {
+            Misc.logd("recv response header error");
             return -1;
         }
 
         if (buf[0] != CommProtocol.HEADER) {
+            Misc.logd("recv response header not HEADER");
             return -1;
         }
 
         if (!readLenData(hander, buf, 1, 7)) {
+            Misc.logd("recv response header data error");
             return -1;
         }
 
         len = ((buf[6] & 0xFF) << 8) | (buf[7] & 0xFF);
         if (len > size) {
+            Misc.logd("recv response len > buffer size");
             return -1;
         }
 
         if (!readLenData(hander, buf, 8, len + 1)) {
+            Misc.logd("recv response data error");
             return -1;
         }
 
@@ -260,6 +399,8 @@ public class CommInteface {
             Misc.logd("check sum error");
             return -1;
         }
+
+        Misc.logd("read response success");
 
         return  len + 9;
     }
@@ -396,6 +537,8 @@ public class CommInteface {
 //                        }
                     } else if (task.type == TaskData.TaskType.TYPE_GET_TERMINAL) {
                         byte[] ter = _getTerminalInfo(bleHandler);
+                    } else if (task.type == TaskData.TaskType.TYPE_UPATA_FW) {
+                        ret = _updateFirmware(bleHandler);
                     }
                 }
 
@@ -415,6 +558,7 @@ public class CommInteface {
             TYPE_GET_USERINFO,
             TYPE_SET_USERINFO,
             TYPE_GET_TERMINAL,
+            TYPE_UPATA_FW,
         };
 
         public TaskType type;

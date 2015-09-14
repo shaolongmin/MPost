@@ -436,7 +436,7 @@ public class BleHandler {
                                                   BluetoothGattCharacteristic characteristic, int status) {
                     super.onCharacteristicWrite(gatt, characteristic, status);
                     if (status == BluetoothGatt.GATT_SUCCESS) {
-                        Misc.logd("ble write success");
+                        //Misc.logd("ble write success");
                     } else {
                         Misc.loge("ble write failed");
                     }
@@ -455,8 +455,7 @@ public class BleHandler {
                         e.printStackTrace();
                     }
 
-                    Misc.loge("ble recv notify data, len " + recv.length);
-
+                    //Misc.loge("ble recv notify data, len " + recv.length);
                 }
 
             };
