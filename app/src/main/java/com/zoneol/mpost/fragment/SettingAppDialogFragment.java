@@ -7,6 +7,11 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.TextView;
+
+import com.zoneol.mpost.R;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -83,6 +88,13 @@ public class SettingAppDialogFragment extends DialogFragment {
                             dismiss();
                         }
                     }) ;
+            dialog = builder.create();
+        } else {
+            View view = LayoutInflater.from(getActivity()).inflate(R.layout.activity_setting_app_progress, null);
+            TextView textView = (TextView)view.findViewById(R.id.app_progress_content) ;
+            textView.setText("正在加载中...");
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
+                    .setView(view);
             dialog = builder.create();
         }
         return dialog;

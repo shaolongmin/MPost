@@ -7,15 +7,14 @@ package com.popsecu.sdk;
 import android.content.Context;
 
 import com.popsecu.sdk.CfgInfo.AppKvInfo;
+import com.popsecu.sdk.CfgInfo.CfgClassInfo;
 import com.popsecu.sdk.CfgInfo.CfgKeyValue;
 import com.popsecu.sdk.CfgInfo.TreeInfo;
-import com.popsecu.sdk.CfgInfo.CfgClassInfo;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
