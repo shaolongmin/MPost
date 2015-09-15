@@ -22,6 +22,7 @@ public class CommInteface {
     private Semaphore mWorkSem;
     private WorkThread mWorkThread;
     private boolean mWorkFlag;
+    private int mBleStatus;
 
     private CommInteface() {
 
@@ -42,6 +43,10 @@ public class CommInteface {
         mTaskQueue = new ConcurrentLinkedQueue<TaskData>();
         mWorkThread = new WorkThread();
         mWorkThread.start();
+    }
+
+    public int getBleStatus() {
+        return mBleStatus;
     }
 
     public void getInstallPackageInfo() {
@@ -334,7 +339,7 @@ public class CommInteface {
 
     private void updateBleStatus(int status) {
         Event evnt = new Event(Event.EventType.GET_USER_CFG);
-        evnt.setIntParam(Ble.BT_STATUS_CONNECTED);
+        evnt.setIntParam(status);
         EventCenter.getInstance().notifyEvent(evnt);
     }
 
@@ -348,11 +353,11 @@ public class CommInteface {
                 BleHandler bleHandler = null;
 
                 while (mWorkFlag) {
-                    updateBleStatus(Ble.BT_STATUS_DISCONNECT);
+                    updateBleStatus(0);
                     bleHandler = new BleHandler(mContext);
                     if (bleHandler.conncet()) {
                         Misc.logd("connect dev success");
-                        updateBleStatus(Ble.BT_STATUS_CONNECTED);
+                        updateBleStatus(1);
                         break;
                     }
                     Misc.logd("connect dev failed");
