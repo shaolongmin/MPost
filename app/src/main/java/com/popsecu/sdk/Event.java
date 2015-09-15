@@ -11,6 +11,7 @@ public class Event {
         SET_USER_CFG,
         GET_TERMINAL,
         UPATA_FW,
+        BLE_STATUS_CHANGED,
 		NONE
 	};
 

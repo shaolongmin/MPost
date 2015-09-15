@@ -338,7 +338,7 @@ public class CommInteface {
     }
 
     private void updateBleStatus(int status) {
-        Event evnt = new Event(Event.EventType.GET_USER_CFG);
+        Event evnt = new Event(Event.EventType.BLE_STATUS_CHANGED);
         evnt.setIntParam(status);
         EventCenter.getInstance().notifyEvent(evnt);
     }
