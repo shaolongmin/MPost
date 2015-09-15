@@ -407,7 +407,7 @@ public class TreeInfoImp {
         return tmp;
     }
 
-    private byte[] serializationAllCfg() {
+    public byte[] serializationAllCfg() {
         ByteArrayOutputStream out =  new ByteArrayOutputStream();
         ByteBuffer buf = ByteBuffer.allocate(64).order(ByteOrder.LITTLE_ENDIAN);
         byte[] packageBuf;

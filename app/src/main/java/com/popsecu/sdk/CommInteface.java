@@ -410,13 +410,18 @@ public class CommInteface {
 
 
                 ///*
-                while (mWorkFlag && bleHandler.isConnected()) {
+                while (mWorkFlag) {
+                    boolean hasTask;
                     try {
                         //mWorkSem.acquire();
-                        mWorkSem.tryAcquire(3, TimeUnit.SECONDS);
+                        hasTask = mWorkSem.tryAcquire(3, TimeUnit.SECONDS);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                         continue;
+                    }
+
+                    if (!hasTask && !bleHandler.isConnected()) {
+                        break;
                     }
 
                     TaskData task = mTaskQueue.poll();
