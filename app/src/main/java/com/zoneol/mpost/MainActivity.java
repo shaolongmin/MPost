@@ -7,15 +7,17 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.popsecu.sdk.CommInteface;
 import com.popsecu.sdk.Controller;
 import com.popsecu.sdk.Event;
 import com.popsecu.sdk.EventCenter;
+import com.popsecu.sdk.Misc;
 import com.zoneol.mpost.activity.DealActivity;
 import com.zoneol.mpost.activity.SettingActivity;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener , EventCenter.Receiver{
 
-    private Menu main_menu_status ;
+    private MenuItem main_menu_status ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +39,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        main_menu_status = menu ;
+        main_menu_status = menu.findItem(R.id.main_menu_status);
+
+        if (CommInteface.getInstance().getBleStatus() == 0) {
+            main_menu_status.setIcon(R.drawable.icon_device) ;
+        } else {
+            main_menu_status.setIcon(R.drawable.icon_device_disconnect) ;
+        }
+
+
         return true;
     }
 
@@ -76,10 +86,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Event.EventType type = event.getType() ;
         if (type == Event.EventType.BLE_STATUS_CHANGED) {
             int parm = event.getIntParam() ;
+            if (main_menu_status == null) {
+                Misc.logd("menu is not ok" );
+                return ;
+            }
             if (parm == 0) {
-//                main_menu_status.findItem(R.id.main_menu_status).setIcon(R.drawable.icon_device) ;
+                main_menu_status.setIcon(R.drawable.icon_device) ;
             } else {
-//                main_menu_status.findItem(R.id.main_menu_status).setIcon(R.drawable.icon_device_disconnect);
+                main_menu_status.setIcon(R.drawable.icon_device_disconnect);
             }
         }
     }
