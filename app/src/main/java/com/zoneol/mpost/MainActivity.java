@@ -15,7 +15,7 @@ import com.zoneol.mpost.activity.SettingActivity;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener , EventCenter.Receiver{
 
-    private MenuItem main_menu_status ;
+    private Menu main_menu_status ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        main_menu_status = (MenuItem)menu.findItem(R.id.main_menu_status) ;
+        main_menu_status = menu ;
         return true;
     }
 
@@ -77,9 +77,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (type == Event.EventType.BLE_STATUS_CHANGED) {
             int parm = event.getIntParam() ;
             if (parm == 0) {
-                main_menu_status.setIcon(getResources().getDrawable(R.drawable.icon_device )) ;
+//                main_menu_status.findItem(R.id.main_menu_status).setIcon(R.drawable.icon_device) ;
             } else {
-                main_menu_status.setIcon(getResources().getDrawable(R.drawable.icon_device_disconnect )) ;
+//                main_menu_status.findItem(R.id.main_menu_status).setIcon(R.drawable.icon_device_disconnect);
             }
         }
     }
