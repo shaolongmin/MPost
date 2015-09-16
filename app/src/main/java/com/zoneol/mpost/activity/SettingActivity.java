@@ -46,8 +46,6 @@ public class SettingActivity extends AppCompatActivity implements AdapterView.On
             sList.add(Controller.getInstance().getTreeInfoImp().getMHwTreeInfo().name) ;
             sList.add(Controller.getInstance().getTreeInfoImp().getAppTreeInfo().name) ;
         }
-
-        sList.add(Controller.getInstance().getTreeInfoImp().getAppTreeInfo().name) ;
         Misc.logd("treeName:" + Controller.getInstance().getTreeInfoImp().getMHwTreeInfo().name +", appName:" + Controller.getInstance().getTreeInfoImp().getAppTreeInfo().name);
         sListView = (ListView)findViewById(R.id.setting_listView) ;
         adapter = new ArrayAdapter<>(
