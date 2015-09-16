@@ -12,6 +12,8 @@ public class Event {
         GET_TERMINAL,
         UPATA_FW,
         BLE_STATUS_CHANGED,
+        SALE,
+        SELECT,
 		NONE
 	};
 

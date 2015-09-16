@@ -90,12 +90,13 @@ public class SettingActivity extends AppCompatActivity implements AdapterView.On
             }
             dialog.show(fm, "");
             TreeInfoImp imp = Controller.getInstance().getTreeInfoImp() ;
-            if (imp.serializationAllCfg() == null) {
+            byte[] buf = imp.serializationAllCfg();
+            if (buf == null) {
                 Toast.makeText(this , "load 失败" , Toast.LENGTH_SHORT).show();
                 dialog.dismiss();
                 return true;
             }
-            CommInteface.getInstance().setUserConfig(imp.serializationAllCfg());
+            CommInteface.getInstance().setUserConfig(buf);
         }
 
         return super.onOptionsItemSelected(item);
@@ -138,13 +139,14 @@ public class SettingActivity extends AppCompatActivity implements AdapterView.On
                 }
                 adapter.notifyDataSetChanged();
             } else {
-                Toast.makeText(this , "upload 失败" , Toast.LENGTH_SHORT).show();
+                Toast.makeText(this , " 获取失败" , Toast.LENGTH_SHORT).show();
             }
         } else if (type ==Event.EventType.SET_USER_CFG ) {
             if (dialog != null) {
                 dialog.dismiss();
             }
-            Toast.makeText(this , "set成功" , Toast.LENGTH_SHORT).show();
+
+            Toast.makeText(this , "设置成功" , Toast.LENGTH_SHORT).show();
         }
     }
 }

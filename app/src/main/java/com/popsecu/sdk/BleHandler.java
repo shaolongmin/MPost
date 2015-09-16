@@ -85,7 +85,7 @@ public class BleHandler {
         scanDevice();
         try {
             //mSemConnect.tryAcquire(CONNECT_TIMEOUT, TimeUnit.SECONDS);
-            mSemConnect.tryAcquire(60, TimeUnit.SECONDS);
+            mSemConnect.tryAcquire(15, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             e.printStackTrace();
             return false;
@@ -450,14 +450,18 @@ public class BleHandler {
                 public void onCharacteristicChanged(BluetoothGatt gatt,
                                                     BluetoothGattCharacteristic characteristic) {
                     super.onCharacteristicChanged(gatt, characteristic);
+
                     byte[] recv = characteristic.getValue();
+
+                    Misc.loge("ble start recv notify data, len " + recv.length);
+
                     try {
                         mRecvBuf.put(recv, 0, recv.length);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
 
-                    //Misc.loge("ble recv notify data, len " + recv.length);
+                    Misc.loge("ble recv notify data, len " + recv.length);
                 }
 
             };

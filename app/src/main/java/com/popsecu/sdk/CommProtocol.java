@@ -23,6 +23,10 @@ public class CommProtocol {
 	public static final byte CMD_STC_CONTROL_CFG_INSTALL = 0x05;
 	public static final byte CMD_STC_CONTROL_TERM_INFO = 0x07;
 
+    public static final byte CMD_STC_TEANS_SALE = 0x02;
+    public static final byte CMD_STC_TEANS_BALANCE = 0x01;
+
+
 
 	public static byte[] packageData(byte step, byte cmd, byte idx, byte[] data, int len) {
 		int packLen = len + 8 + 1;

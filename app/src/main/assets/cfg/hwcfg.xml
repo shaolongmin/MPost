@@ -7,7 +7,7 @@
 		<value name="data bit" type="select" default="8" select="5|6|7|8"/>
 	</key>
 	<key name="PARITYBIT">
-		<value name="parity bit" type="select" default="n" select="o|e|n"/>
+		<value name="parity bit" type="select" default="N" select="O|E|N"/>
 	</key>
 	<key name="STOPBIT">
 		<value name="stop bit" type="select" default="1" select="1|2"/>
@@ -19,7 +19,7 @@
 
 <class name="USB">
 	<key name="MODE">
-		<value name="mode" type="select" default="SALVE" select="MASTER|SLAVE"/>
+		<value name="mode" type="select" default="SLAVE" select="MASTER|SLAVE"/>
 	</key>
 	<key name="FORMAT">
 		<value name="format" type="select" default="HID" select="HID"/>
@@ -28,7 +28,7 @@
 
 <class name="LAN">
 	<key name="DHCP">
-		<value name="dhcp" type="select" default="Enable" select="Enable|Disable"/>
+		<value name="dhcp" type="select" default="Enable" select="ENABLE|DISABLE"/>
 	</key>
 	<key name="IP">
 		<value name="ip address" type="edit" default="192.168.1.1"/>
@@ -103,7 +103,7 @@
 		<value name="mode" type="select" default="PSK" select="PSK|WPA|WPA2|EWP"/>
 	</key>
 	<key name="DHCP">
-		<value name="dhcp" type="select" default="Enable" select="Enable|Disable"/>
+		<value name="dhcp" type="select" default="ENABLE" select="ENABLE|DISABLE"/>
 	</key>
 	<key name="IP">
 		<value name="ip address" type="edit" default="192.168.1.1"/>
@@ -155,9 +155,43 @@
 	</key>
 </class>
 
-<class name="SCRD">
-	<key name="FORMAT">
-		<value name="format" type="edit" default="0"/>		
+<class name="SCC">
+	<key name="VOLTAGE">
+		<value name="voltage" type="select" default="5V" select="5V|3V|1.8V"/>
+	</key>
+	<key name="FI">	
+		<value name="frequency integer" type="select" default="372" select="372|512|1024|1860"/>
+	</key>
+	<key name="DI">	
+		<value name="speed integer" type="select" default="1" select="1|2|4|12|31|64"/>
+	</key>
+	<key name="PPS">	
+		<value name="support pps" type="select" default="NO" select="YES|NO"/>
+	</key>
+	<key name="SPEC">	
+		<value name="specification type" type="select" default="EMV" select="EMV|ISO"/>
+	</key>
+	<key name="INDEX">	
+		<value name="index" type="select" default="SCC" select="SCC|SAM1|SAM2"/>
+	</key>
+	<key name="EXTEND">	
+		<value name="extend device" type="select" default="NO" select="YES|NO"/>
+	</key>
+</class>
+
+
+<class name="SCCL">
+	<key name="MODE">
+		<value name="work mode" type="select" default="EMV" select="EMV|ISO14443|MIFARE|TYPE_A|TYPE_B"/>
+	</key>
+	<key name="EXTEND">	
+		<value name="extend device" type="select" default="NO" select="YES|NO"/>
+	</key>
+</class>
+
+<class name="SEC">
+	<key name="EXTEND">	
+		<value name="extend device" type="select" default="NO" select="YES|NO"/>
 	</key>
 </class>
 

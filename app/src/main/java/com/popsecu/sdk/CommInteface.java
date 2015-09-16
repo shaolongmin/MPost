@@ -80,26 +80,70 @@ public class CommInteface {
         addTask(task);
     }
 
+    public void sale(int value) {
+        TaskData task = new CommInteface.TaskData();
+        task.type = TaskData.TaskType.TYPE_TRADE_SALE;
+
+        String fileName = "" + value;
+        int i;
+        byte[] buf = new byte[fileName.length() + 1];
+        for (i = 0; i < fileName.length(); i++) {
+            buf[i] = fileName.getBytes()[i];
+        }
+        buf[i] = 0;
+        task.data = buf;
+
+        addTask(task);
+    }
+
+    public void getBalance() {
+        TaskData task = new CommInteface.TaskData();
+        task.type = TaskData.TaskType.TYPE_TRADE_SELECT;
+        addTask(task);
+    }
+
     private void addTask(TaskData task) {
         mTaskQueue.add(task);
         mWorkSem.release();
     }
 
+    public byte[] _getBalance(BleHandler bleHandler) {
+        byte[] conf;
+        conf = loadInfoFromDev(bleHandler, CommProtocol.CMD_STC_TRANS,
+                CommProtocol.CMD_STC_TEANS_BALANCE, null);
+        return conf;
+    }
+
+    public int _sale(BleHandler bleHandler, TaskData task) {
+        int ret;
+
+        byte[] sendData = CommProtocol.packageData(CommProtocol.SETP_START, CommProtocol.CMD_STC_TRANS,
+                (byte)0, null, 0);
+
+        ret = downInfoToDev(bleHandler, CommProtocol.CMD_STC_TRANS,
+                CommProtocol.CMD_STC_TEANS_SALE, sendData, task.data);
+
+        return ret;
+    }
+
     private byte[] _getInstallPackageInfo(BleHandler bleHandler) {
         byte[] conf;
-        conf = loadInfoFromDev(bleHandler, CommProtocol.CMD_STC_CONTROL_PACKAGE_INFO, null);
+        conf = loadInfoFromDev(bleHandler, CommProtocol.CMD_STC_CONTROL,
+                CommProtocol.CMD_STC_CONTROL_PACKAGE_INFO, null);
         return conf;
     }
 
     private byte[] _getTerminalInfo(BleHandler bleHandler) {
         byte[] conf;
-        conf = loadInfoFromDev(bleHandler, CommProtocol.CMD_STC_CONTROL_TERM_INFO, null);
+        conf = loadInfoFromDev(bleHandler, CommProtocol.CMD_STC_CONTROL,
+                CommProtocol.CMD_STC_CONTROL_TERM_INFO, null);
         return conf;
     }
 
     private byte[] _getUserConfig(BleHandler bleHandler) {
         byte[] conf;
-        conf = loadInfoFromDev(bleHandler, CommProtocol.CMD_STC_CONTROL_CFG_INFO, null);
+        conf = loadInfoFromDev(bleHandler, CommProtocol.CMD_STC_CONTROL,
+                CommProtocol.CMD_STC_CONTROL_CFG_INFO, null);
         return conf;
     }
 
@@ -112,13 +156,14 @@ public class CommInteface {
         startData[3] = 0;
         startData[4] = 0;
         for (int i = 0; i < fileName.length(); i++) {
-            startData[5 + i] = fileName.getBytes()[i];
+            startData[4 + i] = fileName.getBytes()[i];
         }
 
         byte[] sendData = CommProtocol.packageData(CommProtocol.SETP_START, CommProtocol.CMD_STC_CONTROL,
                 (byte)0, startData, startData.length);
 
-        ret = downInfoToDev(bleHandler, CommProtocol.CMD_STC_CONTROL_CFG_INSTALL, startData, cfgData);
+        ret = downInfoToDev(bleHandler, CommProtocol.CMD_STC_CONTROL,
+                CommProtocol.CMD_STC_CONTROL_CFG_INSTALL, startData, cfgData);
 
         return ret;
     }
@@ -139,7 +184,8 @@ public class CommInteface {
                 return -1;
             }
 
-            int ret = downInfoToDev(handler, CommProtocol.CMD_STC_CONTROL_PACKAGE_INSTALL, head, data);
+            int ret = downInfoToDev(handler, CommProtocol.CMD_STC_CONTROL,
+                    CommProtocol.CMD_STC_CONTROL_PACKAGE_INSTALL, head, data);
             if (ret != 0) {
                 Misc.logd("update firmware error");
                 return -1;
@@ -149,7 +195,7 @@ public class CommInteface {
         return 0;
     }
 
-    private byte[] loadInfoFromDev(BleHandler bleHandler, byte subCmd, byte[] startData) {
+    private byte[] loadInfoFromDev(BleHandler bleHandler, byte cmd, byte subCmd, byte[] startData) {
         int ret;
         byte[] buf = new byte[1024 * 10];
 
@@ -165,7 +211,7 @@ public class CommInteface {
             System.arraycopy(startData, 0, data, 1, startData.length);
         }
 
-        byte[] sendData = CommProtocol.packageData(CommProtocol.SETP_START, CommProtocol.CMD_STC_CONTROL,
+        byte[] sendData = CommProtocol.packageData(CommProtocol.SETP_START,cmd,
                 (byte)0, data, data.length);
         ret = bleHandler.send(sendData, 0, sendData.length);
         if (ret == -1) {
@@ -183,14 +229,14 @@ public class CommInteface {
         return recvData;
     }
 
-    private int downInfoToDev(BleHandler bleHandler, byte subCmd, byte[] startData, byte[] dataData) {
+    private int downInfoToDev(BleHandler bleHandler, byte cmd, byte subCmd, byte[] startData, byte[] dataData) {
         int ret;
-        final  int PACK_SIZE = 1024 * 4;
+        final  int PACK_SIZE = 1024 * 7;
         byte[] buf = new byte[1024];
         byte[] data = new byte[startData.length + 1];
         data[0] = subCmd;
         System.arraycopy(startData, 0, data, 1, startData.length);
-        byte[] sendData = CommProtocol.packageData(CommProtocol.SETP_START, CommProtocol.CMD_STC_CONTROL,
+        byte[] sendData = CommProtocol.packageData(CommProtocol.SETP_START, cmd,
                 (byte)0, data, data.length);
         ret = bleHandler.send(sendData, 0, sendData.length);
         if (ret == -1) {
@@ -200,7 +246,7 @@ public class CommInteface {
         if (ret == -1) {
             return 1;
         }
-        if (buf[2] != CommProtocol.CMD_STC_CONTROL) {
+        if (buf[2] != cmd) {
             return -1;
         }
 
@@ -216,7 +262,7 @@ public class CommInteface {
             data = new byte[sendLen + 1];
             data[0] = subCmd;
             System.arraycopy(dataData, i * PACK_SIZE, data, 1, sendLen);
-            sendData = CommProtocol.packageData(CommProtocol.SETP_DATA, CommProtocol.CMD_STC_CONTROL,
+            sendData = CommProtocol.packageData(CommProtocol.SETP_DATA, cmd,
                     (byte)i, data, data.length);
             ret = bleHandler.send(sendData, 0, sendData.length);
             if (ret == -1) {
@@ -226,14 +272,18 @@ public class CommInteface {
             if (ret == -1) {
                 return -1;
             }
-            if (buf[2] != CommProtocol.CMD_STC_CONTROL) {
+            if (buf[2] != cmd) {
+                return -1;
+            }
+
+            if (buf[8] != 0) {
                 return -1;
             }
         }
 
         data = new byte[1];
         data[0] = subCmd;
-        sendData = CommProtocol.packageData(CommProtocol.SETP_STOP, CommProtocol.CMD_STC_CONTROL,
+        sendData = CommProtocol.packageData(CommProtocol.SETP_STOP, cmd,
                 (byte) 0, data, data.length);
         ret = bleHandler.send(sendData, 0, sendData.length);
         if (ret == -1) {
@@ -243,7 +293,7 @@ public class CommInteface {
         if (ret == -1) {
             return -1;
         }
-        if (buf[2] != CommProtocol.CMD_STC_CONTROL) {
+        if (buf[2] != cmd) {
             return -1;
         }
 
@@ -437,7 +487,6 @@ public class CommInteface {
                     } else if (task.type == TaskData.TaskType.TYPE_GET_USERINFO) {
                         Event evnt = new Event(Event.EventType.GET_USER_CFG);
                         byte[] config = _getUserConfig(bleHandler);
-                        setUserConfig(config);
                         if (config != null) {
                             evnt.setIntParam(0);
                             evnt.setObjectParam(config);
@@ -466,6 +515,25 @@ public class CommInteface {
                             evnt.setIntParam(1);
                         }
                         EventCenter.getInstance().notifyEvent(evnt);
+                    } else if (task.type == TaskData.TaskType.TYPE_TRADE_SALE) {
+                        Event evnt = new Event(Event.EventType.SALE);
+                        ret = _sale(bleHandler, task);
+                        if (ret == 0) {
+                            evnt.setIntParam(0);
+                        } else {
+                            evnt.setIntParam(1);
+                        }
+                        EventCenter.getInstance().notifyEvent(evnt);
+                    } else if (task.type == TaskData.TaskType.TYPE_TRADE_SELECT) {
+                        Event evnt = new Event(Event.EventType.SELECT);
+                        byte[] result = _getBalance(bleHandler);
+                        evnt.setObjectParam(result);
+                        if (result != null) {
+                            evnt.setIntParam(0);
+                        } else {
+                            evnt.setIntParam(1);
+                        }
+                        EventCenter.getInstance().notifyEvent(evnt);
                     }
                 }
 
@@ -486,6 +554,9 @@ public class CommInteface {
             TYPE_SET_USERINFO,
             TYPE_GET_TERMINAL,
             TYPE_UPATA_FW,
+            TYPE_TRADE_SALE,
+            TYPE_TRADE_SELECT,
+            TYPE_TRADE_CANCEL
         };
 
         public TaskType type;

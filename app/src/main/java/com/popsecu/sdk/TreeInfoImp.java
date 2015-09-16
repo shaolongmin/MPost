@@ -76,17 +76,18 @@ public class TreeInfoImp {
         //mRootTreeInfo.add(mHwTreeInfo);
         //mRootTreeInfo.add(mAppTreeInfo);
 
-        byte[] buf = readCfgFromFile();
-        if (buf == null) {
-            return;
-        }
-
-        loadCfgFromDev(buf);
+//        byte[] buf = readCfgFromFile();
+//        if (buf == null) {
+//            return;
+//        }
+//
+//        loadCfgFromDev(buf);
     }
 
     private byte[] readCfgFromFile() {
         int total = 0;
-        File file = new File("/sdcard/tmp.cfg");
+        //File file = new File("/sdcard/tmp.cfg");
+        File file = new File("/sdcard/USERCFG");
         int fileLen = (int)file.length();
         byte[] buf = new byte[fileLen];
         try {
@@ -396,12 +397,17 @@ public class TreeInfoImp {
     }
 
     private  byte[] packageKv(ByteBuffer buf, int hwnd, String key, String value) {
-        buf.position(0);
-        buf.putInt(hwnd);
-        buf.put(key.getBytes(), 0, key.length());
-        buf.put((byte) 0);
-        buf.put(value.getBytes(), 0, value.length());
-        byte[] tmp = buf.array();
+        ByteBuffer buf1 = ByteBuffer.allocate(64).order(ByteOrder.LITTLE_ENDIAN);
+        //buf.clear();
+        //buf.position(0);
+        buf1.putInt(hwnd);
+        buf1.put(key.getBytes(), 0, key.length());
+        buf1.put((byte) 0);
+        buf1.put(value.getBytes(), 0, value.length());
+        buf1.put((byte) 0);
+
+
+        byte[] tmp = buf1.array();
 
         return tmp;
     }
@@ -410,6 +416,14 @@ public class TreeInfoImp {
         ByteArrayOutputStream out =  new ByteArrayOutputStream();
         ByteBuffer buf = ByteBuffer.allocate(64).order(ByteOrder.LITTLE_ENDIAN);
         byte[] packageBuf;
+
+        buf.put(mHwTreeInfo.name.getBytes(), 0, mHwTreeInfo.name.length());
+        try {
+            out.write(buf.array());
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
 
         for (TreeInfo node : mHwTreeInfo.childList) {
             for (TreeInfo subNode : node.childList) {
