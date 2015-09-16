@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         getMenuInflater().inflate(R.menu.menu_main, menu);
         main_menu_status = menu.findItem(R.id.main_menu_status);
 
-        if (CommInteface.getInstance().getBleStatus() == 0) {
+        if (CommInteface.getInstance().getBleStatus() == 1) {
             main_menu_status.setIcon(R.drawable.icon_device) ;
         } else {
             main_menu_status.setIcon(R.drawable.icon_device_disconnect) ;
@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Misc.logd("menu is not ok" );
                 return ;
             }
-            if (parm == 0) {
+            if (parm == 1) {
                 main_menu_status.setIcon(R.drawable.icon_device) ;
             } else {
                 main_menu_status.setIcon(R.drawable.icon_device_disconnect);
