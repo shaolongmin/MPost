@@ -267,7 +267,6 @@ public class CommInteface {
     }
 
     private int recvResponseData(BleHandler hander, byte[] buf, int size) {
-        int ret;
         int len;
         byte lrc = 0;
 

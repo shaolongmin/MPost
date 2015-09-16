@@ -14,7 +14,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -121,11 +120,7 @@ public class BleHandler {
     }
 
     public boolean isConnected() {
-        if (mConnectionState == BT_STATUS_CONNECTED) {
-            return true;
-        } else {
-            return false;
-        }
+        return mConnectionState == BT_STATUS_CONNECTED;
     }
 
     public int send(byte[] data, int offset, int len) {
@@ -206,7 +201,7 @@ public class BleHandler {
         public void run() {
             byte[] buf = new byte[20];
             while (mThreadFlag) {
-                int count = 0;
+                int count;
                 try {
                     count = mSendBuf.take(buf, 0, buf.length);
                 } catch (InterruptedException e) {
@@ -362,7 +357,7 @@ public class BleHandler {
 
     private boolean scanCharacteristics(BluetoothGatt gatt) {
         boolean flag = false;
-        List<BluetoothGattService> tmp = gatt.getServices();
+        //List<BluetoothGattService> tmp = gatt.getServices();
 
         mGattService = gatt.getService(UUID.fromString(UUID_COMM_SERVICE));
         if (mGattService != null) {
@@ -371,7 +366,7 @@ public class BleHandler {
             mNotifyCharacter = mGattService.getCharacteristic(
                     UUID.fromString(UUID_CHARACTER_NOTIFY));
             if ((mWriteCharacter != null) && (mNotifyCharacter != null)) {
-                flag = gatt.setCharacteristicNotification(mNotifyCharacter, true);;
+                flag = gatt.setCharacteristicNotification(mNotifyCharacter, true);
             }
         }
 

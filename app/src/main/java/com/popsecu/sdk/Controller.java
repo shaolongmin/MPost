@@ -28,6 +28,7 @@ public class Controller {
     public void initThreeInfo(Context context) {
         mTreeInfoImp = new TreeInfoImp(context) ;
         mTreeInfoImp.initTreeInfoImp();
+        CommInteface.getInstance().initCommInterface(context);
 //        // test post data
 //        CfgInfo.TreeInfo postTreeInfo = new CfgInfo.TreeInfo() ;
 //        List<CfgInfo.TreeInfo>  postTreeInfoList = new ArrayList<>() ;

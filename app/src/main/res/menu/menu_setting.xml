@@ -3,11 +3,11 @@
       xmlns:tools="http://schemas.android.com/tools"
       tools:context="com.zoneol.mpost.activity.SettingActivity">
       <item android:id="@+id/setting_menu_get"
-                                           android:title="set"
+                                           android:title="get"
                                            android:orderInCategory="100"
                                            app:showAsAction="always"/>
       <item android:id="@+id/setting_menu_upload"
-          android:title="load"
+          android:title="upload"
           android:orderInCategory="100"
           app:showAsAction="always"/>
 </menu>
