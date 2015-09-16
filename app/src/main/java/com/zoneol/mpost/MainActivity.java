@@ -1,11 +1,14 @@
 package com.zoneol.mpost;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.popsecu.sdk.CommInteface;
 import com.popsecu.sdk.Controller;
@@ -18,6 +21,7 @@ import com.zoneol.mpost.activity.SettingActivity;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener , EventCenter.Receiver{
 
     private MenuItem main_menu_status ;
+    private static final int REQUEST_CODE = 1 ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +71,44 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         EventCenter.getInstance().unregister(this);
     }
 
+    private void showChooser() {
+        // Use the GET_CONTENT intent from the utility class
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        // The MIME data type filter
+        intent.setType("*/*");
+        // Only return URIs that can be opened with ContentResolver
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        try {
+//            startActivityForResult(intent, REQUEST_CODE);
+            startActivityForResult(Intent.createChooser(intent, "请选择一个文件进行更新"),
+                    REQUEST_CODE);
+        } catch (ActivityNotFoundException e) {
+            // The reason for the existence of aFileChooser
+            Toast.makeText(this, "请安装文件管理器", Toast.LENGTH_SHORT)
+                    .show();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case REQUEST_CODE:
+                // If the file selection was successful
+                if (resultCode == RESULT_OK) {
+                    if (data != null) {
+                        // Get the URI of the selected file
+                        final Uri uri = data.getData();
+                        Misc.logd("get uri:" +uri);
+                        String realPath = Misc.getRealFilePath(this , uri) ;
+                        Toast.makeText(this , "路径：" + realPath , Toast.LENGTH_SHORT).show();
+                        Misc.logd("realPath:" + realPath);
+                    }
+                }
+                break;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
     @Override
     public void onClick(View v) {
         int id = v.getId() ;
@@ -77,7 +119,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Intent intent = new Intent(this , SettingActivity.class) ;
             startActivity(intent);
         } else if (id == R.id.main_tab_update) {
-
+            showChooser() ;
         }
     }
 
