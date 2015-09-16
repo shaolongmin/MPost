@@ -9,9 +9,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
 
-import com.popsecu.sdk.CommInteface;
 import com.popsecu.sdk.Event;
 import com.popsecu.sdk.EventCenter;
 import com.zoneol.mpost.R;
@@ -21,9 +19,7 @@ public class DealActivity extends AppCompatActivity implements AdapterView.OnIte
     private ListView sListView;
 //    private ArrayList<String> sList = new ArrayList<>();
 
-    private SettingAppDialogFragment dialog = null ;
-
-    private String[] sList = {"消费","查询余额" ,"撤销"} ;
+    private String[] sList = {"发送","接收" ,"传递","等等"} ;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,8 +28,6 @@ public class DealActivity extends AppCompatActivity implements AdapterView.OnIte
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(false);
         init();
-
-        EventCenter.getInstance().register(this);
     }
 
     public void init() {
@@ -72,49 +66,18 @@ public class DealActivity extends AppCompatActivity implements AdapterView.OnIte
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if (position == 0) {
-            CommInteface.getInstance().sale(10000);
-        } else if (position == 1) {
-            CommInteface.getInstance().getBalance();
-        } else {
-            return;
-        }
 
-        FragmentManager fm = getSupportFragmentManager() ;
-        dialog = SettingAppDialogFragment.newInstance(1 , 0 , "") ;
-        dialog.show(fm, "");
+        }
     }
 
     @Override
     public void onEvent(Event event) {
         Event.EventType type = event.getType() ;
         if (type == Event.EventType.BLE_STATUS_CHANGED) {
-            //String result = event.getStringParam() ;
-            //FragmentManager fm = getSupportFragmentManager() ;
-            //SettingAppDialogFragment dialog = SettingAppDialogFragment.newInstance(2 , 0 , result) ;
-            //dialog.show(fm, "");
-        } else if (type == Event.EventType.SALE) {
-            if (dialog != null) {
-                dialog.dismiss();
-                dialog = null;
-            }
-
-            Toast.makeText(this, "交易成功", Toast.LENGTH_LONG).show();
-        } else if (type == Event.EventType.SELECT) {
-            if (dialog != null) {
-                dialog.dismiss();
-                dialog = null;
-            }
-
-            if (event.getIntParam() == 0) {
-                String result = "余额： " + new String((byte[])event.getObjectParam());
-                FragmentManager fm = getSupportFragmentManager() ;
-                SettingAppDialogFragment notify = SettingAppDialogFragment.newInstance(2, 0, result) ;
-                notify.show(fm, "");
-            } else {
-                Toast.makeText(this, "查询失败", Toast.LENGTH_SHORT).show();
-            }
-
-
+            String result = event.getStringParam() ;
+            FragmentManager fm = getSupportFragmentManager() ;
+            SettingAppDialogFragment dialog = SettingAppDialogFragment.newInstance(2 , 0 , result) ;
+            dialog.show(fm, "");
         }
     }
 }
