@@ -9,13 +9,17 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.popsecu.sdk.Event;
 import com.popsecu.sdk.EventCenter;
 import com.zoneol.mpost.R;
+import com.zoneol.mpost.fragment.KeyValueDialogFragment;
 import com.zoneol.mpost.fragment.SettingAppDialogFragment;
 
-public class DealActivity extends AppCompatActivity implements AdapterView.OnItemClickListener , EventCenter.Receiver{
+import java.util.ArrayList;
+
+public class DealActivity extends AppCompatActivity implements AdapterView.OnItemClickListener , EventCenter.Receiver ,KeyValueDialogFragment.KeyValueListener {
     private ListView sListView;
 //    private ArrayList<String> sList = new ArrayList<>();
 
@@ -66,7 +70,10 @@ public class DealActivity extends AppCompatActivity implements AdapterView.OnIte
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if (position == 0) {
-
+            ArrayList<String> arrayStrList = new ArrayList<>() ;
+            FragmentManager fm = getSupportFragmentManager() ;
+            KeyValueDialogFragment dialog = KeyValueDialogFragment.newInstance(true , position , arrayStrList ,false) ;
+            dialog.show(fm, "");
         }
     }
 
@@ -79,5 +86,10 @@ public class DealActivity extends AppCompatActivity implements AdapterView.OnIte
             SettingAppDialogFragment dialog = SettingAppDialogFragment.newInstance(2 , 0 , result) ;
             dialog.show(fm, "");
         }
+    }
+
+    @Override
+    public void onKeyValueListener(int position, String value, boolean isKey) {
+        Toast.makeText(this , "result:" + value , Toast.LENGTH_SHORT).show();
     }
 }
