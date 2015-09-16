@@ -42,7 +42,11 @@ public class SettingActivity extends AppCompatActivity implements AdapterView.On
     }
 
     public void init() {
-        sList.add(Controller.getInstance().getTreeInfoImp().getMHwTreeInfo().name) ;
+        if (!Controller.getInstance().getTreeInfoImp().getMHwTreeInfo().name.isEmpty()) {
+            sList.add(Controller.getInstance().getTreeInfoImp().getMHwTreeInfo().name) ;
+            sList.add(Controller.getInstance().getTreeInfoImp().getAppTreeInfo().name) ;
+        }
+
         sList.add(Controller.getInstance().getTreeInfoImp().getAppTreeInfo().name) ;
         Misc.logd("treeName:" + Controller.getInstance().getTreeInfoImp().getMHwTreeInfo().name +", appName:" + Controller.getInstance().getTreeInfoImp().getAppTreeInfo().name);
         sListView = (ListView)findViewById(R.id.setting_listView) ;
@@ -76,7 +80,7 @@ public class SettingActivity extends AppCompatActivity implements AdapterView.On
             //setting get
             if (dialog == null ) {
                 fm = getSupportFragmentManager() ;
-                dialog = SettingAppDialogFragment.newInstance(1 , 0) ;
+                dialog = SettingAppDialogFragment.newInstance(1 , 0 , "") ;
             }
             dialog.show(fm, "");
             CommInteface.getInstance().getUserConfig();
@@ -84,7 +88,7 @@ public class SettingActivity extends AppCompatActivity implements AdapterView.On
             //setting load
             if (dialog == null ) {
                 fm = getSupportFragmentManager() ;
-                dialog = SettingAppDialogFragment.newInstance(1 , 0) ;
+                dialog = SettingAppDialogFragment.newInstance(1 , 0 , "") ;
             }
             dialog.show(fm, "");
             TreeInfoImp imp = Controller.getInstance().getTreeInfoImp() ;
@@ -129,6 +133,11 @@ public class SettingActivity extends AppCompatActivity implements AdapterView.On
             if (parm == 0) {
                 byte[] result = (byte[])event.getObjectParam() ;
                 Controller.getInstance().getTreeInfoImp().loadCfgFromDev(result) ;
+                if (!Controller.getInstance().getTreeInfoImp().getMHwTreeInfo().name.isEmpty()) {
+                    sList.clear();
+                    sList.add(Controller.getInstance().getTreeInfoImp().getMHwTreeInfo().name) ;
+                    sList.add(Controller.getInstance().getTreeInfoImp().getAppTreeInfo().name) ;
+                }
                 adapter.notifyDataSetChanged();
             } else {
                 Toast.makeText(this , "upload 失败" , Toast.LENGTH_SHORT).show();

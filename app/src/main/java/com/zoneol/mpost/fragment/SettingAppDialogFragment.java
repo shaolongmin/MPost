@@ -25,11 +25,11 @@ public class SettingAppDialogFragment extends DialogFragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-
+    private static final String ARG_PARAM3 = "param3";
     // TODO: Rename and change types of parameters
     private int mType;
     private int mPosition;
-
+    private String mString ;
 
     /**
      * Use this factory method to create a new instance of
@@ -40,11 +40,12 @@ public class SettingAppDialogFragment extends DialogFragment {
      * @return A new instance of fragment SettingAppDialogFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static SettingAppDialogFragment newInstance(int param1, int param2) {
+    public static SettingAppDialogFragment newInstance(int param1, int param2 , String param3) {
         SettingAppDialogFragment fragment = new SettingAppDialogFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_PARAM1, param1);
         args.putInt(ARG_PARAM2, param2);
+        args.putString(ARG_PARAM3 ,param3 );
         fragment.setArguments(args);
         return fragment;
     }
@@ -64,6 +65,7 @@ public class SettingAppDialogFragment extends DialogFragment {
         if (getArguments() != null) {
             mType = getArguments().getInt(ARG_PARAM1);
             mPosition = getArguments().getInt(ARG_PARAM2);
+            mString = getArguments().getString(ARG_PARAM3) ;
         }
     }
 
@@ -89,12 +91,16 @@ public class SettingAppDialogFragment extends DialogFragment {
                         }
                     }) ;
             dialog = builder.create();
-        } else {
+        } else if (mType == 1) {
             View view = LayoutInflater.from(getActivity()).inflate(R.layout.activity_setting_app_progress, null);
             TextView textView = (TextView)view.findViewById(R.id.app_progress_content) ;
             textView.setText("正在加载中...");
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
                     .setView(view);
+            dialog = builder.create();
+        } else {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
+                    .setMessage(mString);
             dialog = builder.create();
         }
         return dialog;

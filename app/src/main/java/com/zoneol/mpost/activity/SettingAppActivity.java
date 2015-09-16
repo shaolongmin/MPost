@@ -81,7 +81,7 @@ public class SettingAppActivity extends AppCompatActivity implements AdapterView
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
         Misc.logd("app long click");
         FragmentManager fm = getSupportFragmentManager() ;
-        SettingAppDialogFragment dialog = SettingAppDialogFragment.newInstance(0 , position) ;
+        SettingAppDialogFragment dialog = SettingAppDialogFragment.newInstance(0 , position , "") ;
         dialog.show(fm, "");
         return false;
     }

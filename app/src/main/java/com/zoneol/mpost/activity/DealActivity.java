@@ -1,15 +1,21 @@
 package com.zoneol.mpost.activity;
 
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.popsecu.sdk.Event;
+import com.popsecu.sdk.EventCenter;
 import com.zoneol.mpost.R;
+import com.zoneol.mpost.fragment.SettingAppDialogFragment;
 
-public class DealActivity extends AppCompatActivity {
+public class DealActivity extends AppCompatActivity implements AdapterView.OnItemClickListener , EventCenter.Receiver{
     private ListView sListView;
 //    private ArrayList<String> sList = new ArrayList<>();
 
@@ -31,6 +37,7 @@ public class DealActivity extends AppCompatActivity {
                 android.R.layout.simple_expandable_list_item_1,
                 sList);
         sListView.setAdapter(adapter);
+        sListView.setOnItemClickListener(this);
     }
 
     @Override
@@ -54,5 +61,23 @@ public class DealActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        if (position == 0) {
+
+        }
+    }
+
+    @Override
+    public void onEvent(Event event) {
+        Event.EventType type = event.getType() ;
+        if (type == Event.EventType.BLE_STATUS_CHANGED) {
+            String result = event.getStringParam() ;
+            FragmentManager fm = getSupportFragmentManager() ;
+            SettingAppDialogFragment dialog = SettingAppDialogFragment.newInstance(2 , 0 , result) ;
+            dialog.show(fm, "");
+        }
     }
 }
