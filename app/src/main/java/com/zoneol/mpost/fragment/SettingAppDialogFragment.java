@@ -94,7 +94,7 @@ public class SettingAppDialogFragment extends DialogFragment {
         } else if (mType == 1) {
             View view = LayoutInflater.from(getActivity()).inflate(R.layout.activity_setting_app_progress, null);
             TextView textView = (TextView)view.findViewById(R.id.app_progress_content) ;
-            textView.setText("正在加载中...");
+            textView.setText("正在处理中...");
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
                     .setView(view);
             dialog = builder.create();

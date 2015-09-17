@@ -4,6 +4,10 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,11 +21,13 @@ import com.popsecu.sdk.EventCenter;
 import com.popsecu.sdk.Misc;
 import com.zoneol.mpost.activity.DealActivity;
 import com.zoneol.mpost.activity.SettingActivity;
+import com.zoneol.mpost.fragment.SettingAppDialogFragment;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener , EventCenter.Receiver{
 
     private MenuItem main_menu_status ;
     private static final int REQUEST_CODE = 1 ;
+    private SettingAppDialogFragment dialog = null ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onDestroy() {
         super.onDestroy();
         EventCenter.getInstance().unregister(this);
+        System.exit(0);
     }
 
     private void showChooser() {
@@ -89,6 +96,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    private Handler hander = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+
+            if (msg.what == 0) {
+                Handler hander = new Handler(Looper.getMainLooper());
+                FragmentManager fm = getSupportFragmentManager() ;
+                dialog = SettingAppDialogFragment.newInstance(1 , 0 , "") ;
+                dialog.show(fm, "");
+
+                CommInteface.getInstance().updateFirmware((String)msg.obj);
+            }
+        }
+    };
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
@@ -98,10 +121,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     if (data != null) {
                         // Get the URI of the selected file
                         final Uri uri = data.getData();
-                        Misc.logd("get uri:" +uri);
-                        String realPath = Misc.getRealFilePath(this , uri) ;
+                        Misc.logd("get uri:" + uri);
+                        String realPath = Misc.getRealFilePath(this, uri) ;
                         Toast.makeText(this , "路径：" + realPath , Toast.LENGTH_SHORT).show();
                         Misc.logd("realPath:" + realPath);
+
+                        Message msg = hander.obtainMessage(0, realPath);
+                        hander.sendMessage(msg);
+
                     }
                 }
                 break;
@@ -120,6 +147,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             startActivity(intent);
         } else if (id == R.id.main_tab_update) {
             showChooser() ;
+
+
         }
     }
 
@@ -136,6 +165,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 main_menu_status.setIcon(R.drawable.icon_device) ;
             } else {
                 main_menu_status.setIcon(R.drawable.icon_device_disconnect);
+            }
+        } else if (type == Event.EventType.UPATA_FW) {
+            if (dialog != null) {
+                dialog.dismiss();
+                dialog = null;
+            }
+            if (event.getIntParam() == 0) {
+                Toast.makeText(this, "更新成功", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(this, "更新失败", Toast.LENGTH_LONG).show();
             }
         }
     }

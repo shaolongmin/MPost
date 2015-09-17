@@ -9,17 +9,24 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
+import com.popsecu.sdk.CommInteface;
 import com.popsecu.sdk.Event;
 import com.popsecu.sdk.EventCenter;
 import com.zoneol.mpost.R;
+import com.zoneol.mpost.fragment.KeyValueDialogFragment;
 import com.zoneol.mpost.fragment.SettingAppDialogFragment;
 
-public class DealActivity extends AppCompatActivity implements AdapterView.OnItemClickListener , EventCenter.Receiver{
+import java.util.ArrayList;
+
+public class DealActivity extends AppCompatActivity implements AdapterView.OnItemClickListener , EventCenter.Receiver ,KeyValueDialogFragment.KeyValueListener {
     private ListView sListView;
 //    private ArrayList<String> sList = new ArrayList<>();
 
-    private String[] sList = {"发送","接收" ,"传递","等等"} ;
+    private SettingAppDialogFragment dialog = null ;
+    private String[] sList = {"消费","查询余额"} ;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,6 +35,7 @@ public class DealActivity extends AppCompatActivity implements AdapterView.OnIte
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(false);
         init();
+        EventCenter.getInstance().register(this);
     }
 
     public void init() {
@@ -66,17 +74,65 @@ public class DealActivity extends AppCompatActivity implements AdapterView.OnIte
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if (position == 0) {
+            ArrayList<String> arrayStrList = new ArrayList<>() ;
+            FragmentManager fm = getSupportFragmentManager() ;
+            KeyValueDialogFragment dialog = KeyValueDialogFragment.newInstance(true , position , arrayStrList ,false) ;
+            dialog.show(fm, "");
+        } else if (position == 1) {
+            CommInteface.getInstance().getBalance();
 
+            FragmentManager fm = getSupportFragmentManager() ;
+            dialog = SettingAppDialogFragment.newInstance(1 , 0 , "") ;
+            dialog.show(fm, "");
+        } else {
+            return;
         }
+
+
     }
 
     @Override
     public void onEvent(Event event) {
         Event.EventType type = event.getType() ;
         if (type == Event.EventType.BLE_STATUS_CHANGED) {
-            String result = event.getStringParam() ;
+            //String result = event.getStringParam() ;
+            //FragmentManager fm = getSupportFragmentManager() ;
+            //SettingAppDialogFragment dialog = SettingAppDialogFragment.newInstance(2 , 0 , result) ;
+            //dialog.show(fm, "");
+        } else if (type == Event.EventType.SALE) {
+            if (dialog != null) {
+                dialog.dismiss();
+                dialog = null;
+            }
+
+            Toast.makeText(this, "交易成功", Toast.LENGTH_LONG).show();
+        } else if (type == Event.EventType.SELECT) {
+            if (dialog != null) {
+                dialog.dismiss();
+                dialog = null;
+            }
+
+            if (event.getIntParam() == 0) {
+                String result = "余额： " + new String((byte[])event.getObjectParam());
+                FragmentManager fm = getSupportFragmentManager() ;
+                SettingAppDialogFragment notify = SettingAppDialogFragment.newInstance(2, 0, result) ;
+                notify.show(fm, "");
+            } else {
+                Toast.makeText(this, "查询失败", Toast.LENGTH_SHORT).show();
+            }
+
+
+        }
+    }
+
+    @Override
+    public void onKeyValueListener(int position, String value, boolean isKey) {
+        Toast.makeText(this , "result:" + value , Toast.LENGTH_SHORT).show();
+        if (position == 0) {
+            CommInteface.getInstance().sale(value);
+
             FragmentManager fm = getSupportFragmentManager() ;
-            SettingAppDialogFragment dialog = SettingAppDialogFragment.newInstance(2 , 0 , result) ;
+            dialog = SettingAppDialogFragment.newInstance(1 , 0 , "") ;
             dialog.show(fm, "");
         }
     }

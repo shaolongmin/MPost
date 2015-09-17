@@ -387,6 +387,9 @@ public class TreeInfoImp {
 
             CfgKeyValue desKv = new CfgKeyValue();
             CfgKeyValue srcKv = mParseXml.getHwKeyValue(mCurrentClassName, key);
+            if (srcKv == null) {
+                Misc.logd("error: key not found " + mCurrentClassName + " " + key);
+            }
             copyKeyValue(desKv, srcKv);
             desKv.defaultValue = value;
             desKv.hwnd = hwnd;

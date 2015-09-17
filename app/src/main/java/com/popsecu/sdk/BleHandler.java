@@ -26,7 +26,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 
 @SuppressLint("NewApi")
-public class BleHandler {
+public class BleHandler extends BtInterface {
     public static final int BT_STATUS_DISCONNECT = 0;
     //public static final int BT_STATUS_CONNECTING = 1;
     public static final int BT_STATUS_CONNECTED = 2;
@@ -80,6 +80,7 @@ public class BleHandler {
         mSemConnect = new Semaphore(0);
     }
 
+    @Override
     public boolean conncet() {
         mConnectionState = BT_STATUS_DISCONNECT;
         scanDevice();
@@ -100,6 +101,7 @@ public class BleHandler {
         return true;
     }
 
+    @Override
     public void close() {
         if (mBluetoothGatt != null) {
             mBluetoothGatt.close();
@@ -119,10 +121,12 @@ public class BleHandler {
         }
     }
 
+    @Override
     public boolean isConnected() {
         return mConnectionState == BT_STATUS_CONNECTED;
     }
 
+    @Override
     public int send(byte[] data, int offset, int len) {
         int ret = -1;
         try {
@@ -453,7 +457,7 @@ public class BleHandler {
 
                     byte[] recv = characteristic.getValue();
 
-                    Misc.loge("ble start recv notify data, len " + recv.length);
+                    Misc.loge("ble start recv data");
 
                     try {
                         mRecvBuf.put(recv, 0, recv.length);
